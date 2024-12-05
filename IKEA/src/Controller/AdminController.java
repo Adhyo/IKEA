@@ -100,9 +100,6 @@ public class AdminController {
         user.setActive(false);
         System.out.println("User " + user.getUsername() + " deactivated.");
     }
-
-    
-
 }
 
 
