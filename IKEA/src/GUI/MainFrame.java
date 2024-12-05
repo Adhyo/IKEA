@@ -1,11 +1,17 @@
 package GUI;
 
+import Model.User;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class MainFrame extends JFrame {
-    public MainFrame() {
-        // Setup Frame
+    private User currentUser;
+
+    public MainFrame(User user) {
+        this.currentUser = user;
+
+        // Setup frame
         setTitle("IKEA Marketplace");
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -16,39 +22,50 @@ public class MainFrame extends JFrame {
         JMenu menu = new JMenu("Menu");
         JMenuItem viewProducts = new JMenuItem("View Products");
         JMenuItem viewCart = new JMenuItem("View Cart");
-        JMenuItem exit = new JMenuItem("Exit");
+        JMenuItem logout = new JMenuItem("Logout");
 
         menu.add(viewProducts);
         menu.add(viewCart);
-        menu.add(exit);
+        if (currentUser != null && currentUser.getUserType().equals("ADMIN")) {
+            JMenuItem manageUsers = new JMenuItem("Manage Users");
+            menu.add(manageUsers);
+        }
+        menu.add(logout);
         menuBar.add(menu);
         setJMenuBar(menuBar);
 
-        // Main Content Panel
+        // Main Panel
         JPanel mainPanel = new JPanel(new CardLayout());
         ProductPanel productPanel = new ProductPanel();
         CartPanel cartPanel = new CartPanel();
 
         mainPanel.add(productPanel, "Products");
-        mainPanel.add(cartPanel, "Cart");
+        if (currentUser != null) {
+            mainPanel.add(cartPanel, "Cart");
+        }
 
-        // Add Listener for Menu Items
+        // Menu Actions
         viewProducts.addActionListener(e -> {
             CardLayout cl = (CardLayout) (mainPanel.getLayout());
             cl.show(mainPanel, "Products");
         });
 
         viewCart.addActionListener(e -> {
-            CardLayout cl = (CardLayout) (mainPanel.getLayout());
-            cl.show(mainPanel, "Cart");
+            if (currentUser == null) {
+                JOptionPane.showMessageDialog(this, "Guest cannot access the cart. Please login first!");
+            } else {
+                CardLayout cl = (CardLayout) (mainPanel.getLayout());
+                cl.show(mainPanel, "Cart");
+            }
         });
 
-        exit.addActionListener(e -> System.exit(0));
+        logout.addActionListener(e -> {
+            dispose();
+            new LoginFrame();
+        });
 
-        // Add Main Panel to Frame
         add(mainPanel, BorderLayout.CENTER);
 
-        // Set visible
         setVisible(true);
     }
 }

@@ -1,10 +1,10 @@
 package Main;
 
-import GUI.MainFrame;
+import GUI.LoginFrame;
 
 public class Main {
     public static void main(String[] args) {
-        // Launch GUI
-        javax.swing.SwingUtilities.invokeLater(() -> new MainFrame());
+        // Start the application with the Login Frame
+        new LoginFrame();
     }
 }
