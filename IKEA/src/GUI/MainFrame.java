@@ -11,13 +11,11 @@ public class MainFrame extends JFrame {
     public MainFrame(User user) {
         this.currentUser = user;
 
-        // Setup frame
         setTitle("IKEA Marketplace");
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        // Menu Bar
         JMenuBar menuBar = new JMenuBar();
         JMenu menu = new JMenu("Menu");
         JMenuItem viewProducts = new JMenuItem("View Products");
@@ -34,7 +32,6 @@ public class MainFrame extends JFrame {
         menuBar.add(menu);
         setJMenuBar(menuBar);
 
-        // Main Panel
         JPanel mainPanel = new JPanel(new CardLayout());
         ProductPanel productPanel = new ProductPanel();
         CartPanel cartPanel = new CartPanel();
@@ -44,7 +41,6 @@ public class MainFrame extends JFrame {
             mainPanel.add(cartPanel, "Cart");
         }
 
-        // Menu Actions
         viewProducts.addActionListener(e -> {
             CardLayout cl = (CardLayout) (mainPanel.getLayout());
             cl.show(mainPanel, "Products");

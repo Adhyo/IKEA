@@ -12,7 +12,6 @@ public class AdminController {
     private List<Order> orders;
     private List<Transaction> transactions;
 
-    // Constructor
     public AdminController(Admin admin) {
         this.admin = admin;
         this.products = new ArrayList<>();
@@ -21,12 +20,10 @@ public class AdminController {
         this.transactions = new ArrayList<>();
     }
 
-    // Get Admin Info
     public Admin getAdminInfo() {
         return admin;
     }
 
-    // Manage Products
     public void addProduct(Product product) {
         products.add(product);
         System.out.println("Product added: " + product.getName());
@@ -41,7 +38,6 @@ public class AdminController {
         return products;
     }
 
-    // Manage Orders
     public void processOrder(Order order) {
         order.setStatus(OrderStatus.DELIVER);
         orders.add(order);
@@ -53,7 +49,6 @@ public class AdminController {
         System.out.println("Order completed with ID: " + order.getOrderID());
     }
 
-    // Generate Transaction
     public void createTransaction(Cart cart, Promo promo) {
         double subTotal = calculateSubtotal(cart);
         double discount = subTotal * (promo.getDiscount() / 100);
@@ -72,7 +67,6 @@ public class AdminController {
         System.out.println("Transaction created with ID: " + transaction.getTransactionID());
     }
 
-    // Helper Methods
     private double calculateSubtotal(Cart cart) {
         double subtotal = 0;
         for (Product product : cart.getProducts().keySet()) {
@@ -81,7 +75,6 @@ public class AdminController {
         return subtotal;
     }
 
-    // Admin Income Report
     public double getAdminIncome() {
         double totalIncome = 0;
         for (Transaction transaction : transactions) {
@@ -90,7 +83,6 @@ public class AdminController {
         return totalIncome;
     }
 
-    // Manage User
     public void activateUser(User user) {
         user.setActive(true);
         System.out.println("User " + user.getUsername() + " activated.");
