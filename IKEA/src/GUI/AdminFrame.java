@@ -27,7 +27,6 @@ public class AdminFrame extends JFrame {
         add(welcomeLabel, BorderLayout.NORTH);
         add(buttonPanel, BorderLayout.CENTER);
 
-        // Event Listeners
         addProductButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

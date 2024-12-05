@@ -7,12 +7,10 @@ public class CartPanel extends JPanel {
     public CartPanel() {
         setLayout(new BorderLayout());
 
-        // Title
         JLabel titleLabel = new JLabel("Shopping Cart", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         add(titleLabel, BorderLayout.NORTH);
 
-        // Cart Items
         String[] columnNames = {"ID", "Name", "Quantity", "Price"};
         Object[][] data = {
                 {1, "Chair", 2, 200.0},
@@ -22,7 +20,6 @@ public class CartPanel extends JPanel {
         JScrollPane scrollPane = new JScrollPane(cartTable);
         add(scrollPane, BorderLayout.CENTER);
 
-        // Action Buttons
         JPanel buttonPanel = new JPanel();
         JButton checkoutButton = new JButton("Checkout");
         JButton clearCartButton = new JButton("Clear Cart");

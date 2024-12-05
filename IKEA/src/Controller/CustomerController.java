@@ -12,7 +12,6 @@ public class CustomerController {
     public CustomerController() {
         this.customerList = new ArrayList<>();
 
-        // Example data
         customerList.add(new Customer(1, "john_doe", "kocak123", "john@gmail.com", UserType.CUSTOMER, "John Doe", "123456789"));
         customerList.add(new Customer(2, "jane_doe", "awikwok123", "jane@gmail.com", UserType.CUSTOMER, "Jane Doe", "987654321"));
     }

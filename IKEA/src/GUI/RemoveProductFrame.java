@@ -16,13 +16,12 @@ public class RemoveProductFrame extends JFrame {
 
         add(idLabel);
         add(idField);
-        add(new JLabel()); // Placeholder
+        add(new JLabel()); 
         add(removeButton);
 
         removeButton.addActionListener(e -> {
             String productId = idField.getText();
 
-            // Simulate removing the product
             JOptionPane.showMessageDialog(this, "Product with ID " + productId + " has been removed.");
         });
 

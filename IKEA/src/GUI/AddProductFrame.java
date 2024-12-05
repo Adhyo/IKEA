@@ -24,7 +24,7 @@ public class AddProductFrame extends JFrame {
         add(priceField);
         add(stockLabel);
         add(stockField);
-        add(new JLabel()); // Placeholder
+        add(new JLabel());
         add(addButton);
 
         addButton.addActionListener(e -> {
@@ -32,7 +32,6 @@ public class AddProductFrame extends JFrame {
             String price = priceField.getText();
             String stock = stockField.getText();
 
-            // Simulate adding the product to the database
             JOptionPane.showMessageDialog(this, "Product Added:\nName: " + name + "\nPrice: " + price + "\nStock: " + stock);
         });
 

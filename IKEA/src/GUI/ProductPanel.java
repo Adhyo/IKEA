@@ -8,12 +8,10 @@ public class ProductPanel extends JPanel {
     public ProductPanel() {
         setLayout(new BorderLayout());
 
-        // Title
         JLabel titleLabel = new JLabel("Product List", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         add(titleLabel, BorderLayout.NORTH);
 
-        // Product Table
         String[] columnNames = {"ID", "Name", "Description", "Price"};
         Object[][] data = {
                 {1, "Chair", "Comfortable wooden chair", 100.0},
@@ -23,7 +21,6 @@ public class ProductPanel extends JPanel {
         JScrollPane scrollPane = new JScrollPane(productTable);
         add(scrollPane, BorderLayout.CENTER);
 
-        // Action Buttons
         JPanel buttonPanel = new JPanel();
         JButton addToCartButton = new JButton("Add to Cart");
         buttonPanel.add(addToCartButton);
