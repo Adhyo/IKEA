@@ -6,6 +6,7 @@ import java.awt.*;
 
 public class ProductPanel extends JPanel {
     public ProductPanel() {
+        
         setLayout(new BorderLayout());
 
         JLabel titleLabel = new JLabel("Product List", SwingConstants.CENTER);

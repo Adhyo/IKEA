@@ -6,8 +6,9 @@ import java.awt.*;
 public class AddProductFrame extends JFrame {
     public AddProductFrame() {
         setTitle("Add Product");
-        setSize(400, 300);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setBounds(350, 0, 700, 700);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setVisible(true);
         setLayout(new GridLayout(5, 2));
 
         JLabel nameLabel = new JLabel("Product Name:");

@@ -6,12 +6,14 @@ import java.awt.*;
 public class RemoveProductFrame extends JFrame {
     public RemoveProductFrame() {
         setTitle("Remove Product");
-        setSize(400, 200);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setBounds(350, 0, 700, 700);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new GridLayout(2, 1));
+        setVisible(true);
 
         JLabel idLabel = new JLabel("Product ID to Remove:");
         JTextField idField = new JTextField();
+        idField.setPreferredSize(new Dimension(20, 100));
         JButton removeButton = new JButton("Remove Product");
 
         add(idLabel);

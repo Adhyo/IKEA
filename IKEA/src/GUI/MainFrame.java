@@ -12,8 +12,9 @@ public class MainFrame extends JFrame {
         this.currentUser = user;
 
         setTitle("IKEA Marketplace");
-        setSize(800, 600);
+        setBounds(350, 0, 700, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setVisible(true);
         setLayout(new BorderLayout());
 
         JMenuBar menuBar = new JMenuBar();

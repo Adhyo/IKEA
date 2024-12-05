@@ -7,9 +7,11 @@ import java.awt.event.ActionListener;
 
 public class AdminFrame extends JFrame {
     public AdminFrame() {
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         setTitle("Admin Menu");
-        setSize(400, 300);
+        setBounds(350, 0, 700, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setVisible(true);
         setLayout(new BorderLayout());
 
         JLabel welcomeLabel = new JLabel("Welcome, Admin!", JLabel.CENTER);

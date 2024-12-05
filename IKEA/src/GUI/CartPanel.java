@@ -6,7 +6,7 @@ import java.awt.*;
 public class CartPanel extends JPanel {
     public CartPanel() {
         setLayout(new BorderLayout());
-
+        
         JLabel titleLabel = new JLabel("Shopping Cart", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         add(titleLabel, BorderLayout.NORTH);

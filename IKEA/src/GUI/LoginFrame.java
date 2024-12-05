@@ -14,17 +14,19 @@ public class LoginFrame extends JFrame {
 
     public LoginFrame() {
         initializeUserDatabase();
-
+    
         setTitle("Login - IKEA Marketplace");
-        setSize(400, 300);
+        setBounds(350, 0, 700, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setVisible(true);
         setLayout(new BorderLayout());
 
         JLabel titleLabel = new JLabel("Welcome to IKEA Marketplace", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        titleLabel.setForeground(new Color(0, 51, 153));
         add(titleLabel, BorderLayout.NORTH);
 
-        JPanel loginPanel = new JPanel(new GridLayout(3, 2, 10, 10));
+        JPanel loginPanel = new JPanel(new GridLayout(2, 2, 10, 10));
         JLabel usernameLabel = new JLabel("Username:");
         JTextField usernameField = new JTextField();
         JLabel passwordLabel = new JLabel("Password:");
