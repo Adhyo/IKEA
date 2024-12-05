@@ -5,10 +5,10 @@ public abstract class User {
     private String username;
     private String password;
     private String email;
-    private String userType;
+    private UserType userType;
     private boolean isActive;
 
-    public User(int userId, String username, String password, String email, String userType) {
+    public User(int userId, String username, String password, String email, UserType userType) {
         this.userId = userId;
         this.username = username;
         this.password = password;
@@ -49,11 +49,11 @@ public abstract class User {
         this.email = email;
     }
 
-    public String getUserType() {
+    public UserType getUserType() {
         return userType;
     }
 
-    public void setUserType(String userType) {
+    public void setUserType(UserType userType) {
         this.userType = userType;
     }
 
