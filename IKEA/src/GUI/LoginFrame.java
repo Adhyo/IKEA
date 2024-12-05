@@ -73,8 +73,8 @@ public class LoginFrame extends JFrame {
 
     private void initializeUserDatabase() {
         userDatabase = new HashMap<>();
-        userDatabase.put("admin", new Admin(1, "admin", "kocak123", "admin@ikea.com", UserType.ADMIN, 0));
-        userDatabase.put("customer1", new Customer(2, "customer1", "awikwok123", "customer1@ikea.com", UserType.CUSTOMER, "akuBang", "123456"));
+        userDatabase.put("admin", new Admin(1, "admin", "kocak123", "admin@ikea.com", 0));
+        userDatabase.put("customer1", new Customer(2, "customer1", "awikwok123", "customer1@ikea.com", "akuBang", "123456"));
     }
 
     private User authenticate(String username, String password) {
