@@ -59,7 +59,12 @@ public class LoginFrame extends JFrame {
             if (user != null) {
                 JOptionPane.showMessageDialog(this, "Login successful as " + user.getUserType());
                 dispose();
-                new MainFrame(user);
+                if (user.getUserType() != UserType.ADMIN) {
+                    new MainFrame(user);
+                }
+                else {
+                    new AdminFrame();
+                }
             } else {
                 JOptionPane.showMessageDialog(this, "Invalid credentials!");
             }
