@@ -49,24 +49,23 @@ public class LoginFrame extends JFrame {
         loginButton.addActionListener(e -> {
             String username = usernameField.getText();
             String password = new String(passwordField.getPassword());
-
+        
             User user = authenticate(username, password);
             if (user != null) {
-                JOptionPane.showMessageDialog(this, "Login successful as " + user.getUserType());
+                JOptionPane.showMessageDialog(this, "Login berhasil sebagai " + user.getUserType());
                 dispose();
-                if (user.getUserType() != UserType.ADMIN) {
-                    new MainFrame(user);
-                }
-                else {
-                    new AdminFrame();
+                if (user.getUserType() == UserType.ADMIN) {
+                    new AdminFrame(); // Menu khusus Admin
+                } else {
+                    new MainFrame(user); // Menu untuk Customer
                 }
             } else {
-                JOptionPane.showMessageDialog(this, "Invalid credentials!");
+                JOptionPane.showMessageDialog(this, "Username atau password salah! Silahkan coba lagi.");
             }
         });
 
         guestButton.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Continuing as Guest");
+            JOptionPane.showMessageDialog(this, "Lanjut sebagai Guest");
             dispose();
             new MainFrame(null);
         });
@@ -76,14 +75,17 @@ public class LoginFrame extends JFrame {
 
     private void initializeUserDatabase() {
         userDatabase = new HashMap<>();
-        userDatabase.put("admin", new Admin(1, "admin", "kocak123", "admin@ikea.com", UserType.ADMIN, 0));
-        userDatabase.put("customer1", new Customer(2, "customer1", "awikwok123", "customer1@ikea.com", UserType.CUSTOMER, "akuBang", "123456"));
+        userDatabase.put("admin", new Admin(1, "admin", "kocak123", "admin@ikea.com", 0));
+        userDatabase.put("customer1", new Customer(2, "customer1", "awikwok123", "customer1@ikea.com", "akuBang", "123456"));
     }
 
     private User authenticate(String username, String password) {
         if (userDatabase.containsKey(username)) {
-            return userDatabase.get(username);
+            User user = userDatabase.get(username);
+            if (user.getPassword().equals(password)) {
+                return user;
+            }
         }
         return null;
-    }
+    }    
 }
