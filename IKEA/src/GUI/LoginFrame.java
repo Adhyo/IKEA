@@ -47,24 +47,23 @@ public class LoginFrame extends JFrame {
         loginButton.addActionListener(e -> {
             String username = usernameField.getText();
             String password = new String(passwordField.getPassword());
-
+        
             User user = authenticate(username, password);
             if (user != null) {
-                JOptionPane.showMessageDialog(this, "Login successful as " + user.getUserType());
+                JOptionPane.showMessageDialog(this, "Login berhasil sebagai " + user.getUserType());
                 dispose();
-                if (user.getUserType() != UserType.ADMIN) {
-                    new MainFrame(user);
-                }
-                else {
-                    new AdminFrame();
+                if (user.getUserType() == UserType.ADMIN) {
+                    new AdminFrame(); // Menu khusus Admin
+                } else {
+                    new MainFrame(user); // Menu untuk Customer
                 }
             } else {
-                JOptionPane.showMessageDialog(this, "Invalid credentials!");
+                JOptionPane.showMessageDialog(this, "Username atau password salah! Silahkan coba lagi.");
             }
         });
 
         guestButton.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Continuing as Guest");
+            JOptionPane.showMessageDialog(this, "Lanjut sebagai Guest");
             dispose();
             new MainFrame(null);
         });
@@ -80,8 +79,11 @@ public class LoginFrame extends JFrame {
 
     private User authenticate(String username, String password) {
         if (userDatabase.containsKey(username)) {
-            return userDatabase.get(username);
+            User user = userDatabase.get(username);
+            if (user.getPassword().equals(password)) {
+                return user;
+            }
         }
         return null;
-    }
+    }    
 }
