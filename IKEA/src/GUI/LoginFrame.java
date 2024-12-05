@@ -7,70 +7,156 @@ import Model.Customer;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.HashMap;
 
 public class LoginFrame extends JFrame {
     private HashMap<String, User> userDatabase;
+    private JTextField usernameField;
+    private JPasswordField passwordField;
 
     public LoginFrame() {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         initializeUserDatabase();
-    
-        setTitle("Login - IKEA Marketplace");
-        setBounds(350, 0, 700, 700);
+
+        setTitle("IKEA Marketplace - Login");
+        setSize(500, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setVisible(true);
-        setLayout(new BorderLayout());
+        setLocationRelativeTo(null); 
 
-        JLabel titleLabel = new JLabel("Welcome to IKEA Marketplace", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        titleLabel.setForeground(new Color(0, 51, 153));
-        add(titleLabel, BorderLayout.NORTH);
+        JPanel mainPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                GradientPaint gradient = new GradientPaint(
+                    0, 0, new Color(0, 51, 153), 
+                    getWidth(), getHeight(), new Color(0, 105, 255)
+                );
+                g2d.setPaint(gradient);
+                g2d.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
+        mainPanel.setLayout(new BorderLayout(10, 10));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        JPanel loginPanel = new JPanel(new GridLayout(2, 2, 10, 10));
+        JPanel logoPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        logoPanel.setOpaque(false);
+        JLabel logoLabel = new JLabel("IKEA Marketplace");
+        logoLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        logoLabel.setForeground(Color.WHITE);
+        logoPanel.add(logoLabel);
+
+        JPanel loginPanel = new JPanel(new GridBagLayout());
+        loginPanel.setOpaque(false);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridwidth = 2;
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
         JLabel usernameLabel = new JLabel("Username:");
-        JTextField usernameField = new JTextField();
+        usernameLabel.setForeground(Color.WHITE);
+        loginPanel.add(usernameLabel, gbc);
+        
+        gbc.gridy = 1;
+        usernameField = new JTextField();
+        usernameField.setPreferredSize(new Dimension(300, 40));
+        loginPanel.add(usernameField, gbc);
+
+        gbc.gridy = 2;
         JLabel passwordLabel = new JLabel("Password:");
-        JPasswordField passwordField = new JPasswordField();
+        passwordLabel.setForeground(Color.WHITE);
+        loginPanel.add(passwordLabel, gbc);
+        
+        gbc.gridy = 3;
+        passwordField = new JPasswordField();
+        passwordField.setPreferredSize(new Dimension(300, 40));
+        loginPanel.add(passwordField, gbc);
 
-        loginPanel.add(usernameLabel);
-        loginPanel.add(usernameField);
-        loginPanel.add(passwordLabel);
-        loginPanel.add(passwordField);
-
-        JButton loginButton = new JButton("Login");
-        JButton guestButton = new JButton("Continue as Guest");
         JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 10, 10));
+        buttonPanel.setOpaque(false);
+        JButton loginButton = createStyledButton("Login", true);
+        JButton guestButton = createStyledButton("Continue as Guest", false);
+        
         buttonPanel.add(loginButton);
         buttonPanel.add(guestButton);
 
-        add(loginPanel, BorderLayout.CENTER);
-        add(buttonPanel, BorderLayout.SOUTH);
+        mainPanel.add(logoPanel, BorderLayout.NORTH);
+        mainPanel.add(loginPanel, BorderLayout.CENTER);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-        loginButton.addActionListener(e -> {
-            String username = usernameField.getText();
-            String password = new String(passwordField.getPassword());
-        
-            User user = authenticate(username, password);
-            if (user != null) {
-                JOptionPane.showMessageDialog(this, "Login berhasil sebagai " + user.getUserType());
-                dispose();
-                if (user.getUserType() == UserType.ADMIN) {
-                    new AdminFrame(); // Menu khusus Admin
+        loginButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String username = usernameField.getText();
+                String password = new String(passwordField.getPassword());
+            
+                User user = authenticate(username, password);
+                if (user != null) {
+                    showCustomDialog("Login Berhasil", 
+                        "Selamat datang, " + user.getUserType(), 
+                        JOptionPane.INFORMATION_MESSAGE);
+                    dispose();
+                    if (user.getUserType() == UserType.ADMIN) {
+                        new AdminFrame();
+                    } else {
+                        new MainFrame(user);
+                    }
                 } else {
-                    new MainFrame(user); // Menu untuk Customer
+                    showCustomDialog("Login Gagal", 
+                        "Username atau password salah!\nSilakan coba lagi.", 
+                        JOptionPane.ERROR_MESSAGE);
                 }
-            } else {
-                JOptionPane.showMessageDialog(this, "Username atau password salah! Silahkan coba lagi.");
             }
         });
 
-        guestButton.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Lanjut sebagai Guest");
-            dispose();
-            new MainFrame(null);
+        guestButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showCustomDialog("Guest Access", 
+                    "Melanjutkan sebagai Tamu", 
+                    JOptionPane.INFORMATION_MESSAGE);
+                dispose();
+                new MainFrame(null);
+            }
         });
 
+        add(mainPanel);
         setVisible(true);
+    }
+
+    private JButton createStyledButton(String text, boolean isPrimary) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Arial", Font.BOLD, 14));
+        button.setPreferredSize(new Dimension(150, 40));
+        
+        if (isPrimary) {
+            button.setBackground(new Color(255, 255, 255));
+            button.setForeground(new Color(0, 51, 153));
+        } else {
+            button.setBackground(new Color(0, 51, 153));
+            button.setForeground(Color.WHITE);
+            button.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+        }
+        
+        button.setFocusPainted(false);
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        return button;
+    }
+
+    private void showCustomDialog(String title, String message, int messageType) {
+        JOptionPane optionPane = new JOptionPane(message, messageType);
+        JDialog dialog = optionPane.createDialog(this, title);
+        dialog.setModal(true);
+        dialog.setVisible(true);
     }
 
     private void initializeUserDatabase() {

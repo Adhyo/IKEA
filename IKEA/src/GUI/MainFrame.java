@@ -4,55 +4,89 @@ import Model.User;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 
 public class MainFrame extends JFrame {
     private User currentUser;
+    private JPanel mainPanel;
+    private CardLayout cardLayout;
 
     public MainFrame(User user) {
+        // Set look and feel
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         this.currentUser = user;
 
+        // Frame configuration
         setTitle("IKEA Marketplace");
-        setBounds(350, 0, 700, 700);
+        setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setVisible(true);
+        setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        JMenuBar menuBar = new JMenuBar();
-        JMenu menu = new JMenu("Menu");
-        JMenuItem viewProducts = new JMenuItem("View Products");
-        JMenuItem viewCart = new JMenuItem("View Cart");
-        JMenuItem logout = new JMenuItem("Logout");
+        // Create menu bar with modern styling
+        createCustomMenuBar();
 
+        // Create main content panel with CardLayout
+        createMainPanel();
+
+        setVisible(true);
+    }
+
+    private void createCustomMenuBar() {
+        // Custom styled menu bar
+        JMenuBar menuBar = new JMenuBar();
+        menuBar.setBackground(new Color(0, 51, 153));
+
+        // Menu with styled look
+        JMenu menu = new JMenu("Menu");
+        menu.setForeground(Color.WHITE);
+        menu.setFont(new Font("Arial", Font.BOLD, 14));
+
+        // Menu items
+        JMenuItem viewProducts = createMenuItem("View Products", KeyEvent.VK_P);
+        JMenuItem viewCart = createMenuItem("View Cart", KeyEvent.VK_C);
+        JMenuItem logout = createMenuItem("Logout", KeyEvent.VK_L);
+
+        // Add menu items to menu
         menu.add(viewProducts);
+        menu.addSeparator();
         menu.add(viewCart);
-        if (currentUser != null && currentUser.getUserType().equals("ADMIN")) {
-            JMenuItem manageUsers = new JMenuItem("Manage Users");
+
+        // Add admin-specific menu item if user is admin
+        if (currentUser != null && currentUser.getUserType().toString().equals("ADMIN")) {
+            JMenuItem manageUsers = createMenuItem("Manage Users", KeyEvent.VK_M);
+            menu.addSeparator();
             menu.add(manageUsers);
+
+            manageUsers.addActionListener(e -> {
+                JOptionPane.showMessageDialog(this, 
+                    "User Management Feature\nComing Soon!", 
+                    "Feature Preview", 
+                    JOptionPane.INFORMATION_MESSAGE);
+            });
         }
+
+        menu.addSeparator();
         menu.add(logout);
+
         menuBar.add(menu);
         setJMenuBar(menuBar);
 
-        JPanel mainPanel = new JPanel(new CardLayout());
-        ProductPanel productPanel = new ProductPanel();
-        CartPanel cartPanel = new CartPanel();
-
-        mainPanel.add(productPanel, "Products");
-        if (currentUser != null) {
-            mainPanel.add(cartPanel, "Cart");
-        }
-
+        // Menu item action listeners
         viewProducts.addActionListener(e -> {
-            CardLayout cl = (CardLayout) (mainPanel.getLayout());
-            cl.show(mainPanel, "Products");
+            cardLayout.show(mainPanel, "Products");
         });
 
         viewCart.addActionListener(e -> {
             if (currentUser == null) {
-                JOptionPane.showMessageDialog(this, "Guest cannot access the cart. Please login first!");
+                showAccessDeniedDialog();
             } else {
-                CardLayout cl = (CardLayout) (mainPanel.getLayout());
-                cl.show(mainPanel, "Cart");
+                cardLayout.show(mainPanel, "Cart");
             }
         });
 
@@ -60,9 +94,43 @@ public class MainFrame extends JFrame {
             dispose();
             new LoginFrame();
         });
+    }
+
+    private JMenuItem createMenuItem(String text, int mnemonic) {
+        JMenuItem item = new JMenuItem(text);
+        item.setFont(new Font("Arial", Font.PLAIN, 12));
+        item.setMnemonic(mnemonic);
+        return item;
+    }
+
+    private void createMainPanel() {
+        // Main content panel with CardLayout
+        cardLayout = new CardLayout();
+        mainPanel = new JPanel(cardLayout);
+
+        ProductPanel productPanel = new ProductPanel();
+        CartPanel cartPanel = new CartPanel();
+
+        mainPanel.add(productPanel, "Products");
+        
+        // Only add cart for logged-in users
+        if (currentUser != null) {
+            mainPanel.add(cartPanel, "Cart");
+        }
 
         add(mainPanel, BorderLayout.CENTER);
 
-        setVisible(true);
+        // Default to Products view
+        cardLayout.show(mainPanel, "Products");
+    }
+
+    private void showAccessDeniedDialog() {
+        JOptionPane optionPane = new JOptionPane(
+            "Guest cannot access the cart. Please login first!", 
+            JOptionPane.WARNING_MESSAGE
+        );
+        JDialog dialog = optionPane.createDialog(this, "Access Denied");
+        dialog.setModal(true);
+        dialog.setVisible(true);
     }
 }
