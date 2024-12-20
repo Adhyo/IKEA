@@ -13,7 +13,7 @@ public class DatabaseManager {
     //     return DriverManager.getConnection(URL, USER, PASSWORD);
     // }
 
-     public Connection con;
+    public Connection con;
     private String driver = "com.mysql.cj.jdbc.Driver";
     private String url = "jdbc:mysql://localhost/ikea";
     // private String url = "jdbc:mysql://localhost/db_test?serverTimezone=" +

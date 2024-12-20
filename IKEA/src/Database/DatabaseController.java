@@ -1,36 +1,34 @@
 package Database;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import Model.Admin;
 
 public class DatabaseController {
-
     private static DatabaseManager db = new DatabaseManager();
 
-    public static Admin getEmailAdmin(String email) {
-        Admin user = new Admin();
-
+    public boolean checkLogin(String username, String password) {
         try {
             db.connect();
-            String query1 = "SELECT * FROM admin WHERE Email ='" + email + "'";
-            Statement stmt1 = db.con.createStatement();
-            ResultSet rs1 = stmt1.executeQuery(query1);
-
-            if (rs1.next()) {
-                do {
-                    user.getPassword();
-                } while (rs1.next());
-
-            } else {
-                return null;
+            String query = "SELECT * FROM admin WHERE name = ? AND password = ?";
+            try (PreparedStatement pstmt = db.con.prepareStatement(query)) {
+                pstmt.setString(1, username);
+                pstmt.setString(2, password);
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    return rs.next(); 
+                }
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (db.con != null) {
+                    db.con.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
-        db.disconnect();
-        return user;
     }
 }
