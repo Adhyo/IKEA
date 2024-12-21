@@ -49,7 +49,7 @@ public class AdminFrame extends JFrame {
 
         // Create custom styled buttons
         JButton addProductButton = createStyledButton("Add Product", true);
-        JButton removeProductButton = createStyledButton("Remove Product", false);
+        JButton removeProductButton = createStyledButton("Remove Product", true);
         JButton manageUsersButton = createStyledButton("Manage Users", true);
 
         buttonPanel.add(addProductButton);
@@ -86,11 +86,12 @@ public class AdminFrame extends JFrame {
         button.setPreferredSize(new Dimension(200, 50));
         
         if (isPrimary) {
-            button.setBackground(Color.WHITE);
-            button.setForeground(new Color(0, 51, 153));
+            button.setBackground(new Color(0, 51, 153));
+            button.setForeground(new Color(248, 209, 21));
+            button.setBorder(BorderFactory.createLineBorder(Color.WHITE));
         } else {
             button.setBackground(new Color(0, 51, 153));
-            button.setForeground(Color.WHITE);
+            button.setForeground(new Color(4, 52, 140));
             button.setBorder(BorderFactory.createLineBorder(Color.WHITE));
         }
         
@@ -104,8 +105,8 @@ public class AdminFrame extends JFrame {
         JButton logoutButton = new JButton("Logout");
         logoutButton.setFont(new Font("Arial", Font.BOLD, 14));
         logoutButton.setPreferredSize(new Dimension(200, 40));
-        logoutButton.setBackground(new Color(220, 53, 69));
-        logoutButton.setForeground(Color.WHITE);
+        logoutButton.setBackground(new Color(0, 51, 153));
+        logoutButton.setForeground(new Color (4, 52, 140));
         logoutButton.setFocusPainted(false);
         logoutButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         
