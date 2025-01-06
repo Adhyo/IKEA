@@ -100,9 +100,8 @@ public class LoginFrame extends JFrame {
 
                 User user = dbController.authenticateUser(username, password);
                 if (user != null) {
-                    String userTypeStr = user.getUserType() == UserType.ADMIN ? "Admin" : "Customer";
                     showCustomDialog("Login Berhasil",
-                            "Selamat datang, " + userTypeStr + "!",
+                            "Selamat datang, " + user.getUsername() + "!",
                             JOptionPane.INFORMATION_MESSAGE);
                     dispose();
                     if (user.getUserType() == UserType.ADMIN) {
