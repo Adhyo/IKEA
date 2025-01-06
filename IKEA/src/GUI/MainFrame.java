@@ -97,7 +97,7 @@ public class MainFrame extends JFrame {
     private JButton createMenuButton(String text, int mnemonic, java.awt.event.ActionListener listener) {
         JButton button = new JButton(text);
         button.setFont(new Font("Arial", Font.BOLD, 14));
-        button.setForeground(Color.WHITE);
+        button.setForeground(new Color(4, 52, 140));
         button.setBackground(new Color(0, 51, 153));
         button.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
         button.setFocusPainted(false);
@@ -113,7 +113,7 @@ public class MainFrame extends JFrame {
             }
 
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setForeground(Color.WHITE);
+                button.setForeground(new Color(4, 52, 140));
             }
         });
         
