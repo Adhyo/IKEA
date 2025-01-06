@@ -67,12 +67,7 @@ public class AdminFrame extends JFrame {
 
         removeProductButton.addActionListener(e -> new RemoveProductFrame());
 
-        manageUsersButton.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, 
-                "User Management Feature\nComing Soon!", 
-                "Feature Preview", 
-                JOptionPane.INFORMATION_MESSAGE);
-        });
+        manageUsersButton.addActionListener(e -> new ManageUserFrame());
 
         // Add main panel to frame
         add(mainPanel);
