@@ -1,5 +1,6 @@
 package GUI;
 
+import Model.CartObserver;
 import Model.User;
 import javax.swing.*;
 import java.awt.*;
@@ -7,11 +8,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import Database.DatabaseManager;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProductPanel extends JPanel {
     private final DatabaseManager db = DatabaseManager.getInstance();
     private JPanel productsGrid;
     private User currentUser;
+    private final List<CartObserver> observers = new ArrayList<>();
+
     
     public ProductPanel(User user) {
         this.currentUser = user;
@@ -164,6 +169,21 @@ public class ProductPanel extends JPanel {
         productsGrid.add(card);
     }
 
+
+    public void addObserver(CartObserver observer) {
+        observers.add(observer);
+    }
+
+    public void removeObserver(CartObserver observer) {
+        observers.remove(observer);
+    }
+
+    private void notifyObservers() {
+        for (CartObserver observer : observers) {
+            observer.onCartUpdated();
+        }
+    }
+
     private void addToCart(int productId, int quantity) {
         try {
             db.connect();
@@ -206,6 +226,8 @@ public class ProductPanel extends JPanel {
                 "Product added to cart successfully!",
                 "Success",
                 JOptionPane.INFORMATION_MESSAGE);
+
+            notifyObservers();
                 
         } catch (SQLException e) {
             e.printStackTrace();

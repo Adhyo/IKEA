@@ -1,6 +1,7 @@
 package GUI;
 
 import Model.User;
+import Model.CartObserver;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -10,7 +11,7 @@ import java.sql.SQLException;
 import Database.DatabaseManager;
 import java.time.LocalDate;
 
-public class CartPanel extends JPanel {
+public class CartPanel extends JPanel implements CartObserver {
     private final DatabaseManager db = DatabaseManager.getInstance();
     private final User currentUser;
     private JTable cartTable;
@@ -379,6 +380,15 @@ public class CartPanel extends JPanel {
         } finally {
             db.disconnect();
         }
+    }
+
+    @Override
+    public void onCartUpdated() {
+        refreshCart(); // Muat ulang data keranjang
+    }
+
+    public void refreshCart() {
+        loadCartItems(); // Sudah ada di implementasi sebelumnya
     }
 
     private JButton createStyledButton(String text) {

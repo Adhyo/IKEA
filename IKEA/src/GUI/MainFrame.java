@@ -10,7 +10,9 @@ public class MainFrame extends JFrame {
     private User currentUser;
     private JPanel mainPanel;
     private CardLayout cardLayout;
-
+    private CartPanel cartPanel;
+    private ProductPanel productPanel;
+    
     public MainFrame(User user) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -123,12 +125,15 @@ public class MainFrame extends JFrame {
         mainPanel = new JPanel(cardLayout);
         mainPanel.setOpaque(false);
 
-        // Add product panel
-        mainPanel.add(new ProductPanel(currentUser), "Products");
-        
-        // Add cart panel for logged-in users
+        // Buat panel produk
+        productPanel = new ProductPanel(currentUser);
+        mainPanel.add(productPanel, "Products");
+
+        // Buat panel keranjang
         if (currentUser != null) {
-            mainPanel.add(new CartPanel(currentUser), "Cart");
+            cartPanel = new CartPanel(currentUser);
+            productPanel.addObserver(cartPanel); // Tambahkan CartPanel sebagai observer
+            mainPanel.add(cartPanel, "Cart");
         }
 
         cardLayout.show(mainPanel, "Products");
