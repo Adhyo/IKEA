@@ -88,7 +88,7 @@ public class MainFrame extends JFrame {
                 new LoginFrame(); 
             }));
         } else {
-            rightPanel.add(createMenuButton("Logout", KeyEvent.VK_L, e -> {
+            rightPanel.add(createMenuButton("Log out", KeyEvent.VK_L, e -> {
                 dispose(); 
                 new LoginFrame(); 
             }));
