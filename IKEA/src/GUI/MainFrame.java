@@ -80,13 +80,19 @@ public class MainFrame extends JFrame {
             }
         }
 
-        // Add logout button to the right
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         rightPanel.setOpaque(false);
-        rightPanel.add(createMenuButton("Logout", KeyEvent.VK_L, e -> {
-            dispose();
-            new LoginFrame();
-        }));
+        if (currentUser == null) {
+            rightPanel.add(createMenuButton("Login", KeyEvent.VK_L, e -> {
+                dispose();
+                new LoginFrame(); 
+            }));
+        } else {
+            rightPanel.add(createMenuButton("Logout", KeyEvent.VK_L, e -> {
+                dispose(); 
+                new LoginFrame(); 
+            }));
+        }
         
         menuBar.add(Box.createHorizontalGlue());
         menuBar.add(rightPanel);
