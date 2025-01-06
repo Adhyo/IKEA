@@ -14,13 +14,12 @@ import java.util.List;
 
 public class AddProductFrame extends JFrame {
     private DatabaseController dbController;
-    private DatabaseManager db;
+    private final DatabaseManager db = DatabaseManager.getInstance();
     private JComboBox<String> categoryComboBox;
     private List<Category> categories;
 
     public AddProductFrame() {
         dbController = new DatabaseController();
-        db = new DatabaseManager();
         categories = new ArrayList<>();
 
         // Set look and feel

@@ -9,13 +9,12 @@ import java.sql.SQLException;
 import Database.DatabaseManager;
 
 public class ProductPanel extends JPanel {
-    private DatabaseManager db;
+    private final DatabaseManager db = DatabaseManager.getInstance();
     private JPanel productsGrid;
     private User currentUser;
     
     public ProductPanel(User user) {
         this.currentUser = user;
-        db = new DatabaseManager();
         setLayout(new BorderLayout());
         
         // Create gradient background

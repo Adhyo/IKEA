@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.util.Vector;
 
 public class RemoveProductFrame extends JFrame {
-    private DatabaseManager db = new DatabaseManager();
+    private final DatabaseManager db = DatabaseManager.getInstance();
     private JTable productTable;
     private DefaultTableModel tableModel;
 

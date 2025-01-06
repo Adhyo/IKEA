@@ -10,7 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class DatabaseController {
-    private static DatabaseManager db = new DatabaseManager();
+    private static final DatabaseManager db = DatabaseManager.getInstance();
 
     public User authenticateUser(String username, String password) {
         try {
