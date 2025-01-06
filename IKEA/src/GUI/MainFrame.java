@@ -128,7 +128,7 @@ public class MainFrame extends JFrame {
         
         // Add cart panel for logged-in users
         if (currentUser != null) {
-            mainPanel.add(new CartPanel(), "Cart");
+            mainPanel.add(new CartPanel(currentUser), "Cart");
         }
 
         cardLayout.show(mainPanel, "Products");
