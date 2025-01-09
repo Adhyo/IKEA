@@ -1,11 +1,13 @@
 package GUI;
 
-import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javax.swing.*;
 
 public class AdminFrame extends JFrame {
+
+    // Declare buttonPanel as an instance variable
+    private JPanel buttonPanel;
+
     public AdminFrame() {
         // Set look and feel
         try {
@@ -27,8 +29,8 @@ public class AdminFrame extends JFrame {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g;
                 GradientPaint gradient = new GradientPaint(
-                    0, 0, new Color(0, 51, 153), 
-                    getWidth(), getHeight(), new Color(0, 105, 255)
+                        0, 0, new Color(0, 51, 153),
+                        getWidth(), getHeight(), new Color(0, 105, 255)
                 );
                 g2d.setPaint(gradient);
                 g2d.fillRect(0, 0, getWidth(), getHeight());
@@ -43,8 +45,8 @@ public class AdminFrame extends JFrame {
         welcomeLabel.setForeground(Color.WHITE);
         mainPanel.add(welcomeLabel, BorderLayout.NORTH);
 
-        // Button Panel
-        JPanel buttonPanel = new JPanel(new GridLayout(3, 1, 10, 20));
+        // Initialize buttonPanel
+        buttonPanel = new JPanel(new GridLayout(4, 1, 10, 20));
         buttonPanel.setOpaque(false);
 
         // Create custom styled buttons
@@ -64,14 +66,30 @@ public class AdminFrame extends JFrame {
 
         // Action Listeners
         addProductButton.addActionListener(e -> new AddProductFrame());
-
         removeProductButton.addActionListener(e -> new RemoveProductFrame());
-
         manageUsersButton.addActionListener(e -> new ManageUserFrame());
 
         // Add main panel to frame
         add(mainPanel);
+
+        // Make the frame visible
         setVisible(true);
+
+        // Add transactionHistoryButton after buttonPanel is initialized
+        addTransactionHistoryButton();
+    }
+
+    // Method to add the transaction history button
+    private void addTransactionHistoryButton() {
+        JButton transactionHistoryButton = createStyledButton("Transaction History", true);
+        buttonPanel.add(transactionHistoryButton);
+
+        // Add its action listener
+        transactionHistoryButton.addActionListener(e -> new TransactionHistoryFrame());
+
+        // Refresh the UI
+        buttonPanel.revalidate();
+        buttonPanel.repaint();
     }
 
     // Custom styled button method
@@ -79,7 +97,7 @@ public class AdminFrame extends JFrame {
         JButton button = new JButton(text);
         button.setFont(new Font("Arial", Font.BOLD, 16));
         button.setPreferredSize(new Dimension(200, 50));
-        
+
         if (isPrimary) {
             button.setBackground(new Color(0, 51, 153));
             button.setForeground(new Color(248, 209, 21));
@@ -89,7 +107,7 @@ public class AdminFrame extends JFrame {
             button.setForeground(new Color(4, 52, 140));
             button.setBorder(BorderFactory.createLineBorder(Color.WHITE));
         }
-        
+
         button.setFocusPainted(false);
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         return button;
@@ -101,15 +119,15 @@ public class AdminFrame extends JFrame {
         logoutButton.setFont(new Font("Arial", Font.BOLD, 14));
         logoutButton.setPreferredSize(new Dimension(200, 40));
         logoutButton.setBackground(new Color(0, 51, 153));
-        logoutButton.setForeground(new Color (4, 52, 140));
+        logoutButton.setForeground(new Color(4, 52, 140));
         logoutButton.setFocusPainted(false);
         logoutButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        
+
         logoutButton.addActionListener(e -> {
             dispose();
             new LoginFrame();
         });
-        
+
         return logoutButton;
     }
 }
