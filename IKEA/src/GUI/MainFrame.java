@@ -7,13 +7,20 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 
 public class MainFrame extends JFrame {
+    private static MainFrame instance;
     private User currentUser;
     private JPanel mainPanel;
     private CardLayout cardLayout;
     private CartPanel cartPanel;
+    private CheckoutPanel checkoutPanel;
     private ProductPanel productPanel;
     
+    public static MainFrame getInstance() {
+        return instance;
+    }
+    
     public MainFrame(User user) {
+        instance = this;
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
@@ -65,10 +72,10 @@ public class MainFrame extends JFrame {
         menuBar.add(titleLabel);
 
         // Menu items
-        menuBar.add(createMenuButton("Products", KeyEvent.VK_P, e -> cardLayout.show(mainPanel, "Products")));
+        menuBar.add(createMenuButton("Products", KeyEvent.VK_P, e -> showProductPanel()));
         
         if (currentUser != null) {
-            menuBar.add(createMenuButton("Cart", KeyEvent.VK_C, e -> cardLayout.show(mainPanel, "Cart")));
+            menuBar.add(createMenuButton("Cart", KeyEvent.VK_C, e -> showCartPanel()));
             
             if (currentUser.getUserType().toString().equals("ADMIN")) {
                 menuBar.add(createMenuButton("Manage Users", KeyEvent.VK_M, e -> {
@@ -131,18 +138,46 @@ public class MainFrame extends JFrame {
         mainPanel = new JPanel(cardLayout);
         mainPanel.setOpaque(false);
 
-        // Buat panel produk
+        // Create product panel
         productPanel = new ProductPanel(currentUser);
         mainPanel.add(productPanel, "Products");
 
-        // Buat panel keranjang
+        // Create cart and checkout panels if user is logged in
         if (currentUser != null) {
             cartPanel = new CartPanel(currentUser);
-            productPanel.addObserver(cartPanel); // Tambahkan CartPanel sebagai observer
+            checkoutPanel = new CheckoutPanel(currentUser);
+            
+            // Set up observers
+            productPanel.addObserver(cartPanel);
+            cartPanel.addCartObserver(checkoutPanel);
+            
+            // Add panels to card layout
             mainPanel.add(cartPanel, "Cart");
+            mainPanel.add(checkoutPanel, "Checkout");
         }
 
         cardLayout.show(mainPanel, "Products");
+    }
+
+    // Navigation methods
+    public void showProductPanel() {
+        cardLayout.show(mainPanel, "Products");
+    }
+
+    public void showCartPanel() {
+        if (currentUser == null) {
+            showAccessDeniedDialog();
+            return;
+        }
+        cardLayout.show(mainPanel, "Cart");
+    }
+
+    public void showCheckoutPanel() {
+        if (currentUser == null) {
+            showAccessDeniedDialog();
+            return;
+        }
+        cardLayout.show(mainPanel, "Checkout");
     }
 
     private void showAccessDeniedDialog() {
