@@ -18,9 +18,13 @@ public class CartPanel extends JPanel implements CartObserver {
     private JLabel totalLabel;
     private double totalAmount = 0.0;
     private java.util.List<CartObserver> observers = new java.util.ArrayList<>();
+    private JSpinner quantitySpinner;
+    private JDialog editDialog;
+    private final MainFrame mainFrame;
 
-    public CartPanel(User user) {
+    public CartPanel(User user, MainFrame mainFrame) {
         this.currentUser = user;
+        this.mainFrame = mainFrame;
         setLayout(new BorderLayout());
 
         // Create gradient background
@@ -66,15 +70,18 @@ public class CartPanel extends JPanel implements CartObserver {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
         buttonPanel.setOpaque(false);
         
+        JButton editButton = createStyledButton("Edit Item");
         JButton checkoutButton = createStyledButton("Proceed to Checkout");
         JButton clearCartButton = createStyledButton("Clear Cart");
         JButton removeItemButton = createStyledButton("Remove Selected");
         
+        buttonPanel.add(editButton);
         buttonPanel.add(checkoutButton);
         buttonPanel.add(clearCartButton);
         buttonPanel.add(removeItemButton);
 
         // Add action listeners
+        editButton.addActionListener(e -> showEditDialog());
         checkoutButton.addActionListener(e -> proceedToCheckout());
         clearCartButton.addActionListener(e -> clearCart());
         removeItemButton.addActionListener(e -> removeSelectedItem());
@@ -98,7 +105,7 @@ public class CartPanel extends JPanel implements CartObserver {
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column == 3; // Only quantity is editable
+                return false; // Make all cells non-editable (editing through dialog)
             }
         };
         
@@ -108,12 +115,141 @@ public class CartPanel extends JPanel implements CartObserver {
         cartTable.setRowHeight(25);
         cartTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
         
-        // Add change listener for quantity updates
-        tableModel.addTableModelListener(e -> {
-            if (e.getColumn() == 3) { // Quantity column
-                updateQuantity(e.getFirstRow());
+        // Enable row selection
+        cartTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    }
+
+    private void showEditDialog() {
+        int selectedRow = cartTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this,
+                "Please select an item to edit",
+                "No Selection",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Get current values
+        int productId = (int) tableModel.getValueAt(selectedRow, 0);
+        String productName = (String) tableModel.getValueAt(selectedRow, 1);
+        double price = (double) tableModel.getValueAt(selectedRow, 2);
+        int currentQuantity = (int) tableModel.getValueAt(selectedRow, 3);
+
+        // Create edit dialog
+        editDialog = new JDialog(mainFrame, "Edit Cart Item", true);
+        editDialog.setLayout(new BorderLayout(10, 10));
+        editDialog.setSize(300, 200);
+        editDialog.setLocationRelativeTo(this);
+
+        // Create content panel with gradient
+        JPanel contentPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                GradientPaint gradient = new GradientPaint(
+                    0, 0, new Color(0, 51, 153),
+                    getWidth(), getHeight(), new Color(0, 105, 255)
+                );
+                g2d.setPaint(gradient);
+                g2d.fillRect(0, 0, getWidth(), getHeight());
             }
+        };
+        contentPanel.setLayout(new GridBagLayout());
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(5, 5, 5, 5);
+
+        // Add product details
+        JLabel nameLabel = new JLabel("Product: " + productName);
+        nameLabel.setForeground(Color.WHITE);
+        contentPanel.add(nameLabel, gbc);
+
+        gbc.gridy++;
+        JLabel priceLabel = new JLabel(String.format("Price: $%.2f", price));
+        priceLabel.setForeground(Color.WHITE);
+        contentPanel.add(priceLabel, gbc);
+
+        gbc.gridy++;
+        JLabel quantityLabel = new JLabel("Quantity:");
+        quantityLabel.setForeground(Color.WHITE);
+        contentPanel.add(quantityLabel, gbc);
+
+        gbc.gridx++;
+        SpinnerNumberModel spinnerModel = new SpinnerNumberModel(currentQuantity, 1, 99, 1);
+        quantitySpinner = new JSpinner(spinnerModel);
+        quantitySpinner.setPreferredSize(new Dimension(80, 25));
+        contentPanel.add(quantitySpinner, gbc);
+
+        // Button panel
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.setOpaque(false);
+        
+        JButton saveButton = createStyledButton("Save");
+        JButton cancelButton = createStyledButton("Cancel");
+
+        saveButton.addActionListener(e -> {
+            updateItemQuantity(selectedRow, productId, (int) quantitySpinner.getValue());
+            editDialog.dispose();
         });
+
+        cancelButton.addActionListener(e -> editDialog.dispose());
+
+        buttonPanel.add(saveButton);
+        buttonPanel.add(cancelButton);
+
+        editDialog.add(contentPanel, BorderLayout.CENTER);
+        editDialog.add(buttonPanel, BorderLayout.SOUTH);
+        editDialog.setVisible(true);
+    }
+
+    private void updateItemQuantity(int row, int productId, int newQuantity) {
+        try {
+            db.connect();
+            
+            // Get cart ID
+            String cartQuery = "SELECT cart_id FROM carts WHERE user_id = ? AND cart_id NOT IN (SELECT cart_id FROM orders)";
+            PreparedStatement cartStmt = db.con.prepareStatement(cartQuery);
+            cartStmt.setInt(1, currentUser.getUserId());
+            ResultSet cartRs = cartStmt.executeQuery();
+            
+            if (cartRs.next()) {
+                int cartId = cartRs.getInt("cart_id");
+                
+                // Update quantity
+                String updateQuery = "UPDATE cart_products SET quantity = ? WHERE cart_id = ? AND product_id = ?";
+                PreparedStatement updateStmt = db.con.prepareStatement(updateQuery);
+                updateStmt.setInt(1, newQuantity);
+                updateStmt.setInt(2, cartId);
+                updateStmt.setInt(3, productId);
+                updateStmt.executeUpdate();
+                
+                // Update display
+                double price = (double) tableModel.getValueAt(row, 2);
+                double newSubtotal = price * newQuantity;
+                tableModel.setValueAt(newQuantity, row, 3);
+                tableModel.setValueAt(newSubtotal, row, 4);
+                
+                // Update total
+                calculateTotal();
+                
+                // Notify observers of the change
+                notifyObservers();
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                "Error updating quantity: " + e.getMessage(),
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+        } finally {
+            db.disconnect();
+        }
     }
 
     private void loadCartItems() {

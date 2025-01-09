@@ -144,7 +144,7 @@ public class MainFrame extends JFrame {
 
         // Create cart and checkout panels if user is logged in
         if (currentUser != null) {
-            cartPanel = new CartPanel(currentUser);
+            cartPanel = new CartPanel(currentUser, this);
             checkoutPanel = new CheckoutPanel(currentUser);
             
             // Set up observers
