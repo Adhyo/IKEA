@@ -39,7 +39,7 @@ public class AdminFrame extends JFrame {
         welcomeLabel.setForeground(Color.WHITE);
         mainPanel.add(welcomeLabel, BorderLayout.NORTH);
 
-        buttonPanel = new JPanel(new GridLayout(7, 1, 10, 20));
+        buttonPanel = new JPanel(new GridLayout(8, 1, 10, 20));
         buttonPanel.setOpaque(false);
 
         JButton addProductButton = createStyledButton("Add Product", true);
@@ -49,6 +49,7 @@ public class AdminFrame extends JFrame {
         JButton notificationsButton = createStyledButton("Send Notifications", true);
         JButton transactionHistoryButton = createStyledButton("Transaction History", true);
         JButton viewIncomeButton = createStyledButton("View Income", true);
+        JButton viewReturnRequest = createStyledButton("View Return Request", true);
 
         buttonPanel.add(addProductButton);
         buttonPanel.add(removeProductButton);
@@ -57,6 +58,7 @@ public class AdminFrame extends JFrame {
         buttonPanel.add(notificationsButton);
         buttonPanel.add(transactionHistoryButton);
         buttonPanel.add(viewIncomeButton);
+        buttonPanel.add(viewReturnRequest);
 
         mainPanel.add(buttonPanel, BorderLayout.CENTER);
 
@@ -70,6 +72,7 @@ public class AdminFrame extends JFrame {
         notificationsButton.addActionListener(e -> new AdminNotificationForm());
         transactionHistoryButton.addActionListener(e -> new TransactionHistoryFrame());
         viewIncomeButton.addActionListener(e -> new CalculateIncome());
+        viewReturnRequest.addActionListener(e -> new AdminReturnFrame());
 
         add(mainPanel);
         setVisible(true);
