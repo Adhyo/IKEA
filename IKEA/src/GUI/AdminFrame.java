@@ -39,8 +39,7 @@ public class AdminFrame extends JFrame {
         welcomeLabel.setForeground(Color.WHITE);
         mainPanel.add(welcomeLabel, BorderLayout.NORTH);
 
-        // Updated GridLayout to accommodate 6 buttons (5 original + 1 new)
-        buttonPanel = new JPanel(new GridLayout(6, 1, 10, 20));
+        buttonPanel = new JPanel(new GridLayout(7, 1, 10, 20));
         buttonPanel.setOpaque(false);
 
         JButton addProductButton = createStyledButton("Add Product", true);
@@ -48,12 +47,16 @@ public class AdminFrame extends JFrame {
         JButton manageUsersButton = createStyledButton("Manage Users", true);
         JButton managePromosButton = createStyledButton("Manage Promos", true);
         JButton notificationsButton = createStyledButton("Send Notifications", true);
+        JButton transactionHistoryButton = createStyledButton("Transaction History", true);
+        JButton viewIncomeButton = createStyledButton("View Income", true);
 
         buttonPanel.add(addProductButton);
         buttonPanel.add(removeProductButton);
         buttonPanel.add(manageUsersButton);
         buttonPanel.add(managePromosButton);
         buttonPanel.add(notificationsButton);
+        buttonPanel.add(transactionHistoryButton);
+        buttonPanel.add(viewIncomeButton);
 
         mainPanel.add(buttonPanel, BorderLayout.CENTER);
 
@@ -65,20 +68,11 @@ public class AdminFrame extends JFrame {
         manageUsersButton.addActionListener(e -> new ManageUserFrame());
         managePromosButton.addActionListener(e -> new PromoManagementFrame());
         notificationsButton.addActionListener(e -> new AdminNotificationForm());
+        transactionHistoryButton.addActionListener(e -> new TransactionHistoryFrame());
+        viewIncomeButton.addActionListener(e -> new CalculateIncome());
 
         add(mainPanel);
         setVisible(true);
-        addTransactionHistoryButton();
-    }
-
-    private void addTransactionHistoryButton() {
-        JButton transactionHistoryButton = createStyledButton("Transaction History", true);
-        buttonPanel.add(transactionHistoryButton);
-
-        transactionHistoryButton.addActionListener(e -> new TransactionHistoryFrame());
-
-        buttonPanel.revalidate();
-        buttonPanel.repaint();
     }
 
     private JButton createStyledButton(String text, boolean isPrimary) {
