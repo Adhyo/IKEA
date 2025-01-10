@@ -1,13 +1,13 @@
 package Model;
 
 public class Order {
-    private String orderID;
+    private int orderID;
     private String address;
     private String cartID;
     private double price;
     private OrderStatus status;
 
-    public Order(String orderID, String address, String cartID, double price, OrderStatus status) {
+    public Order(int orderID, String address, String cartID, double price, OrderStatus status) {
         this.orderID = orderID;
         this.address = address;
         this.cartID = cartID;
@@ -15,10 +15,10 @@ public class Order {
         this.status = status;
     }
     
-    public String getOrderID() {
+    public int getOrderID() {
         return orderID;
     }
-    public void setOrderID(String orderID) {
+    public void setOrderID(int orderID) {
         this.orderID = orderID;
     }
     public String getAddress() {
