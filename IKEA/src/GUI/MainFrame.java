@@ -34,7 +34,6 @@ public class MainFrame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Create gradient background
         JPanel backgroundPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -64,14 +63,12 @@ public class MainFrame extends JFrame {
         menuBar.setBackground(new Color(0, 51, 153));
         menuBar.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-        // Logo/Title
         JLabel titleLabel = new JLabel("IKEA Marketplace");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
         titleLabel.setForeground(new Color(248, 209, 21));
         titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 20));
         menuBar.add(titleLabel);
 
-        // Menu items
         menuBar.add(createMenuButton("Products", KeyEvent.VK_P, e -> showProductPanel()));
         
         if (currentUser != null) {
@@ -95,10 +92,37 @@ public class MainFrame extends JFrame {
                 new LoginFrame(); 
             }));
         } else {
-            rightPanel.add(createMenuButton("Log out", KeyEvent.VK_L, e -> {
-                dispose(); 
-                new LoginFrame(); 
-            }));
+            JButton profileButton = createMenuButton(currentUser.getUsername(), KeyEvent.VK_U, null);
+            
+            JPopupMenu profileMenu = new JPopupMenu();
+            profileMenu.setBackground(new Color(0, 51, 153));
+            
+            JMenuItem editProfileItem = new JMenuItem("Edit Profile");
+            editProfileItem.setForeground(new Color(248, 209, 21));
+            editProfileItem.setBackground(new Color(0, 51, 153));
+            editProfileItem.addActionListener(e -> new EditProfileFrame(
+                currentUser.getUserId(), 
+                currentUser.getUsername(), 
+                currentUser.getEmail()
+            ));
+            
+            JMenuItem logoutItem = new JMenuItem("Logout");
+            logoutItem.setForeground(new Color(248, 209, 21));
+            logoutItem.setBackground(new Color(0, 51, 153));
+            logoutItem.addActionListener(e -> {
+                dispose();
+                new LoginFrame();
+            });
+            
+            profileMenu.add(editProfileItem);
+            profileMenu.addSeparator();
+            profileMenu.add(logoutItem);
+            
+            profileButton.addActionListener(e -> {
+                profileMenu.show(profileButton, 0, profileButton.getHeight());
+            });
+            
+            rightPanel.add(profileButton);
         }
         
         menuBar.add(Box.createHorizontalGlue());
@@ -117,9 +141,10 @@ public class MainFrame extends JFrame {
         button.setContentAreaFilled(false);
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         button.setMnemonic(mnemonic);
-        button.addActionListener(listener);
+        if (listener != null) {
+            button.addActionListener(listener);
+        }
         
-        // Hover effect
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setForeground(new Color(248, 209, 21));
@@ -138,20 +163,16 @@ public class MainFrame extends JFrame {
         mainPanel = new JPanel(cardLayout);
         mainPanel.setOpaque(false);
 
-        // Create product panel
         productPanel = new ProductPanel(currentUser);
         mainPanel.add(productPanel, "Products");
 
-        // Create cart and checkout panels if user is logged in
         if (currentUser != null) {
             cartPanel = new CartPanel(currentUser, this);
             checkoutPanel = new CheckoutPanel(currentUser);
             
-            // Set up observers
             productPanel.addObserver(cartPanel);
             cartPanel.addCartObserver(checkoutPanel);
             
-            // Add panels to card layout
             mainPanel.add(cartPanel, "Cart");
             mainPanel.add(checkoutPanel, "Checkout");
         }
@@ -159,7 +180,6 @@ public class MainFrame extends JFrame {
         cardLayout.show(mainPanel, "Products");
     }
 
-    // Navigation methods
     public void showProductPanel() {
         cardLayout.show(mainPanel, "Products");
     }

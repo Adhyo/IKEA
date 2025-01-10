@@ -70,19 +70,17 @@ public class ProductPanel extends JPanel {
         headerLabel.setForeground(new Color(248, 209, 21));
         headerLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        buttonPanel.setOpaque(false);
+        // Only create the Transaction History button if user is logged in
+        if (currentUser != null) {
+            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+            buttonPanel.setOpaque(false);
 
-        JButton editProfileButton = createStyledButton("Edit Profile");
-        editProfileButton.addActionListener(e -> openEditProfilePanel());
-        buttonPanel.add(editProfileButton);
+            JButton custHistoryButton = createStyledButton("Transaction History");
+            custHistoryButton.addActionListener(e -> openTransactionHistoryPanel());
+            buttonPanel.add(custHistoryButton);
 
-        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
-
-        JButton custHistoryButton = createStyledButton("Transaction History");
-        custHistoryButton.addActionListener(e -> openTransactionHistoryPanel());
-
-        buttonPanel.add(custHistoryButton);
+            mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+        }
 
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         searchPanel.setOpaque(false);
@@ -110,14 +108,11 @@ public class ProductPanel extends JPanel {
         return button;
     }
 
-    private void openEditProfilePanel() {
-        new EditProfileFrame(currentUser.getUserId(), currentUser.getUsername(), currentUser.getEmail());
-    }
-
     private void openTransactionHistoryPanel() {
         new CustTransactionHistory(currentUser.getUserId());
     }
 
+    // Rest of the methods remain the same
     private void loadProducts() {
         try {
             db.connect();
