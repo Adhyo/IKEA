@@ -359,7 +359,7 @@ public class AddProductFrame extends JFrame {
 
             while (rs.next()) {
                 Category category = new Category(
-                    rs.getString("category_id"),
+                    rs.getInt("category_id"),
                     rs.getString("category_name")
                 );
                 categories.add(category);
@@ -367,7 +367,7 @@ public class AddProductFrame extends JFrame {
             }
 
             if (categories.isEmpty()) {
-                Category defaultCategory = new Category("0", "Default");
+                Category defaultCategory = new Category(0, "Default");
                 categories.add(defaultCategory);
                 categoryComboBox.addItem(defaultCategory.getCategoryName());
             }
@@ -383,7 +383,7 @@ public class AddProductFrame extends JFrame {
         return categories.stream()
                 .filter(c -> c.getCategoryName().equals(categoryName))
                 .findFirst()
-                .orElse(new Category("0", "Default"));
+                .orElse(new Category(0, "Default"));
     }
 
     private boolean validateInputs(JTextField nameField, JTextField priceField, JTextField stockField) {
@@ -443,7 +443,7 @@ public class AddProductFrame extends JFrame {
             pstmt.setString(2, product.getDescription());
             pstmt.setDouble(3, product.getPrice());
             pstmt.setInt(4, product.getStockQuantity());
-            pstmt.setInt(5, Integer.parseInt(product.getCategory().getCategoryID())); // Convert to int
+            pstmt.setInt(5, product.getCategory().getCategoryId()); 
             pstmt.setDouble(6, product.getDiscountPrice());
             pstmt.setString(7, imageFileName);
 
