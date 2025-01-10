@@ -5,22 +5,19 @@ import java.awt.*;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel; 
+import javax.swing.table.DefaultTableModel;
 
-public class TransactionHistoryFrame extends JFrame {
-    private JTable transactionTable;
+public class AdminReturnFrame extends JFrame {
+    private JTable returnTable;
     private DefaultTableModel tableModel;
-    private DatabaseManager db; 
+    private DatabaseManager db;
 
-    public TransactionHistoryFrame() {
-        // Frame setup
-        setTitle("Transaction History");
+    public AdminReturnFrame() {
+        setTitle("Return Requests");
         setSize(800, 600);
         setLocationRelativeTo(null);
-        
-        // Main panel with gradient background
+
         JPanel mainPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -37,29 +34,26 @@ public class TransactionHistoryFrame extends JFrame {
         mainPanel.setLayout(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Title Label
-        JLabel titleLabel = new JLabel("Transaction History", JLabel.CENTER);
+        JLabel titleLabel = new JLabel("Return Requests", JLabel.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titleLabel.setForeground(Color.WHITE);
         mainPanel.add(titleLabel, BorderLayout.NORTH);
 
-        // Create table
-        String[] columns = {"Transaction ID", "Cart ID", "Subtotal", "Final Amount", "Date"};
+        String[] columns = {"Request ID", "Transaction ID", "User ID", "Request Date"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Make table read-only
+                return false;
             }
         };
-        transactionTable = new JTable(tableModel);
-        transactionTable.setFillsViewportHeight(true);
-        transactionTable.setBackground(Color.WHITE);
-        transactionTable.setForeground(Color.BLACK);
-        transactionTable.setFont(new Font("Arial", Font.PLAIN, 14));
-        transactionTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
-        
-        // Scroll pane for table
-        JScrollPane scrollPane = new JScrollPane(transactionTable);
+        returnTable = new JTable(tableModel);
+        returnTable.setFillsViewportHeight(true);
+        returnTable.setBackground(Color.WHITE);
+        returnTable.setForeground(Color.BLACK);
+        returnTable.setFont(new Font("Arial", Font.PLAIN, 14));
+        returnTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
+
+        JScrollPane scrollPane = new JScrollPane(returnTable);
         scrollPane.setBackground(Color.WHITE);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
@@ -67,48 +61,43 @@ public class TransactionHistoryFrame extends JFrame {
         refreshButton.setFont(new Font("Arial", Font.BOLD, 14));
         refreshButton.setBackground(new Color(0, 51, 153));
         refreshButton.setForeground(Color.WHITE);
-        refreshButton.addActionListener(e -> loadTransactions());
+        refreshButton.addActionListener(e -> loadReturnRequests());
         mainPanel.add(refreshButton, BorderLayout.SOUTH);
 
         add(mainPanel);
         setVisible(true);
-        
-        // Load transactions when frame opens
-        loadTransactions();
+
+        loadReturnRequests();
     }
 
-    private void loadTransactions() {
-        // Clear existing table data
+    private void loadReturnRequests() {
         tableModel.setRowCount(0);
-        
+
         try {
-            db = DatabaseManager.getInstance(); // Get database instance
-            db.connect(); // Connect to database
-            
-            String query = "SELECT * FROM transactions ORDER BY transaction_date DESC";
+            db = DatabaseManager.getInstance();
+            db.connect();
+
+            String query = "SELECT * FROM return_requests ORDER BY request_date DESC";
             PreparedStatement stmt = db.con.prepareStatement(query);
             ResultSet rs = stmt.executeQuery();
 
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
             while (rs.next()) {
                 Object[] row = {
+                    rs.getInt("id"),
                     rs.getInt("transaction_id"),
-                    rs.getInt("cart_id"),
-                    String.format("$%.2f", rs.getDouble("sub_total")),
-                    String.format("$%.2f", rs.getDouble("final_amount")),
-                    dateFormat.format(rs.getDate("transaction_date"))
+                    rs.getInt("user_id"),
+                    rs.getDate("request_date")
                 };
                 tableModel.addRow(row);
             }
 
             rs.close();
             stmt.close();
-            db.disconnect(); // Disconnect from database
+            db.disconnect();
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this,
-                "Error loading transactions: " + e.getMessage(),
+                "Error loading return requests: " + e.getMessage(),
                 "Database Error",
                 JOptionPane.ERROR_MESSAGE);
         }

@@ -7,19 +7,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel; // Import the correct database class
+import javax.swing.table.DefaultTableModel;
 
 public class CustTransactionHistory extends JFrame {
     private JTable transactionTable;
     private DefaultTableModel tableModel;
     private DatabaseManager db;
-    private int customerID; // Added to store customer ID
+    private int customerID;
 
     public CustTransactionHistory(int customerID) {
-        this.customerID = customerID; // Store customer ID
+        this.customerID = customerID;
 
         setTitle("Transaction History");
-        setSize(800, 600);
+        setSize(900, 600);
         setLocationRelativeTo(null);
 
         JPanel mainPanel = new JPanel() {
@@ -43,11 +43,11 @@ public class CustTransactionHistory extends JFrame {
         titleLabel.setForeground(Color.WHITE);
         mainPanel.add(titleLabel, BorderLayout.NORTH);
 
-        String[] columns = {"Transaction ID", "Cart ID", "Subtotal", "Final Amount", "Date"};
+        String[] columns = {"Transaction ID", "Cart ID", "Subtotal", "Final Amount", "Date", "Actions"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false;
+                return column == 5; // Only the "Actions" column is editable
             }
         };
         transactionTable = new JTable(tableModel);
@@ -76,29 +76,33 @@ public class CustTransactionHistory extends JFrame {
 
     private void loadTransactions() {
         tableModel.setRowCount(0);
-    
+
         try {
             db = DatabaseManager.getInstance();
             db.connect();
-    
+
             String query = "SELECT * FROM transactions WHERE user_id = ? ORDER BY transaction_date DESC";
             PreparedStatement stmt = db.con.prepareStatement(query);
-            stmt.setInt(1, customerID); // Use customerID (which is user_id) in the query
+            stmt.setInt(1, customerID);
             ResultSet rs = stmt.executeQuery();
-    
+
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    
+
             while (rs.next()) {
                 Object[] row = {
                     rs.getInt("transaction_id"),
                     rs.getInt("cart_id"),
                     String.format("$%.2f", rs.getDouble("sub_total")),
                     String.format("$%.2f", rs.getDouble("final_amount")),
-                    dateFormat.format(rs.getDate("transaction_date"))
+                    dateFormat.format(rs.getDate("transaction_date")),
+                    "Request Return"
                 };
                 tableModel.addRow(row);
             }
-    
+
+            transactionTable.getColumn("Actions").setCellRenderer(new ButtonRenderer());
+            transactionTable.getColumn("Actions").setCellEditor(new ButtonEditor(new JCheckBox(), customerID));
+
             rs.close();
             stmt.close();
             db.disconnect();
@@ -110,5 +114,70 @@ public class CustTransactionHistory extends JFrame {
                 JOptionPane.ERROR_MESSAGE);
         }
     }
-    
+
+    private static class ButtonRenderer extends JButton implements javax.swing.table.TableCellRenderer {
+        public ButtonRenderer() {
+            setOpaque(true);
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            setText(value == null ? "" : value.toString());
+            return this;
+        }
+    }
+
+    private class ButtonEditor extends DefaultCellEditor {
+        private JButton button;
+        private String label;
+        private boolean isPushed;
+        private int customerID;
+
+        public ButtonEditor(JCheckBox checkBox, int customerID) {
+            super(checkBox);
+            this.customerID = customerID;
+            button = new JButton();
+            button.setOpaque(true);
+            button.addActionListener(e -> fireEditingStopped());
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            label = (value == null) ? "" : value.toString();
+            button.setText(label);
+            isPushed = true;
+            return button;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            if (isPushed) {
+                int transactionID = (int) tableModel.getValueAt(transactionTable.getSelectedRow(), 0);
+                requestReturn(transactionID);
+            }
+            isPushed = false;
+            return label;
+        }
+
+        private void requestReturn(int transactionID) {
+            try {
+                db = DatabaseManager.getInstance();
+                db.connect();
+
+                String query = "INSERT INTO return_requests (transaction_id, user_id, request_date) VALUES (?, ?, ?)";
+                PreparedStatement stmt = db.con.prepareStatement(query);
+                stmt.setInt(1, transactionID);
+                stmt.setInt(2, customerID);
+                stmt.setDate(3, new java.sql.Date(System.currentTimeMillis()));
+                stmt.executeUpdate();
+                stmt.close();
+
+                JOptionPane.showMessageDialog(null, "Return request submitted successfully.");
+                db.disconnect();
+            } catch (SQLException e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Error submitting return request: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
 }
