@@ -5,35 +5,56 @@ import Database.DatabaseManager;
 import Model.Category;
 import Model.Product;
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import java.io.File;
+import java.nio.file.*;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class AddProductFrame extends JFrame {
     private DatabaseController dbController;
     private final DatabaseManager db = DatabaseManager.getInstance();
     private JComboBox<String> categoryComboBox;
     private List<Category> categories;
+    private String selectedImagePath;
+    private JLabel imagePreview;
+    private final int PREVIEW_WIDTH = 200;
+    private final int PREVIEW_HEIGHT = 200;
+    private static final String UPLOAD_DIR = "src/main/resources/product_images/";
+    
+    // Add fields as class members for easy access
+    private JTextField nameField;
+    private JTextField descriptionField;
+    private JTextField priceField;
+    private JTextField stockField;
 
     public AddProductFrame() {
         dbController = new DatabaseController();
         categories = new ArrayList<>();
-
-        // Set look and feel
+        
+        // Ensure upload directory exists
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            Files.createDirectories(Paths.get(UPLOAD_DIR));
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         // Frame configuration
         setTitle("IKEA Marketplace - Add Product");
-        setSize(500, 650);
+        setSize(700, 800);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
+
+        // Initialize text fields
+        nameField = createStyledTextField();
+        descriptionField = createStyledTextField();
+        priceField = createStyledTextField();
+        stockField = createStyledTextField();
 
         // Main panel with IKEA-themed gradient background
         JPanel mainPanel = createGradientPanel();
@@ -44,53 +65,50 @@ public class AddProductFrame extends JFrame {
         JLabel titleLabel = createStyledTitleLabel("Add New Product");
         mainPanel.add(titleLabel, BorderLayout.NORTH);
 
-        // Form Panel
-        JPanel formPanel = new JPanel(new GridLayout(8, 2, 10, 20));
-        formPanel.setOpaque(false);
+        // Create main content panel with GridBagLayout
+        JPanel contentPanel = new JPanel(new GridBagLayout());
+        contentPanel.setOpaque(false);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(5, 5, 5, 5);
 
-        // Create form components
-        JLabel nameLabel = createStyledLabel("Product Name:");
-        JTextField nameField = createStyledTextField();
+        // Image Preview Panel
+        JPanel imagePanel = new JPanel(new BorderLayout(10, 10));
+        imagePanel.setOpaque(false);
+        imagePreview = new JLabel();
+        imagePreview.setPreferredSize(new Dimension(PREVIEW_WIDTH, PREVIEW_HEIGHT));
+        imagePreview.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+        imagePreview.setHorizontalAlignment(JLabel.CENTER);
         
-        JLabel descLabel = createStyledLabel("Description:");
-        JTextField descField = createStyledTextField();
+        JButton uploadButton = createStyledButton("Upload Image", false);
+        uploadButton.addActionListener(e -> handleImageUpload());
         
-        JLabel priceLabel = createStyledLabel("Price (Rp):");
-        JTextField priceField = createStyledTextField();
-        
-        JLabel stockLabel = createStyledLabel("Stock Quantity:");
-        JTextField stockField = createStyledTextField();
+        imagePanel.add(imagePreview, BorderLayout.CENTER);
+        imagePanel.add(uploadButton, BorderLayout.SOUTH);
 
-        JLabel categoryLabel = createStyledLabel("Category:");
+        // Add image panel
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        contentPanel.add(imagePanel, gbc);
+
+        // Reset gridwidth
+        gbc.gridwidth = 1;
+
+        // Add form fields using class member text fields
+        addFormField(contentPanel, "Product Name:", nameField, gbc, 1);
+        addFormField(contentPanel, "Description:", descriptionField, gbc, 2);
+        addFormField(contentPanel, "Price (Rp):", priceField, gbc, 3);
+        addFormField(contentPanel, "Stock Quantity:", stockField, gbc, 4);
+        
+        // Category ComboBox
+        gbc.gridy = 5;
+        gbc.gridx = 0;
+        contentPanel.add(createStyledLabel("Category:"), gbc);
         categoryComboBox = createStyledComboBox();
+        gbc.gridx = 1;
+        contentPanel.add(categoryComboBox, gbc);
         loadCategories();
-        
-        JLabel weightLabel = createStyledLabel("Weight (kg):");
-        JTextField weightField = createStyledTextField();
-        
-        JLabel colorLabel = createStyledLabel("Color:");
-        JTextField colorField = createStyledTextField();
-        
-        JLabel dimensionsLabel = createStyledLabel("Dimensions:");
-        JTextField dimensionsField = createStyledTextField();
-
-        // Add components to form panel
-        formPanel.add(nameLabel);
-        formPanel.add(nameField);
-        formPanel.add(descLabel);
-        formPanel.add(descField);
-        formPanel.add(priceLabel);
-        formPanel.add(priceField);
-        formPanel.add(stockLabel);
-        formPanel.add(stockField);
-        formPanel.add(categoryLabel);
-        formPanel.add(categoryComboBox);
-        formPanel.add(weightLabel);
-        formPanel.add(weightField);
-        formPanel.add(colorLabel);
-        formPanel.add(colorField);
-        formPanel.add(dimensionsLabel);
-        formPanel.add(dimensionsField);
 
         // Button Panel
         JPanel buttonPanel = createButtonPanel();
@@ -99,20 +117,69 @@ public class AddProductFrame extends JFrame {
         buttonPanel.add(addButton);
         buttonPanel.add(cancelButton);
 
-        // Add panels to main panel
-        JPanel centerPanel = new JPanel(new BorderLayout());
-        centerPanel.setOpaque(false);
-        centerPanel.add(formPanel, BorderLayout.CENTER);
-        centerPanel.add(buttonPanel, BorderLayout.SOUTH);
-        mainPanel.add(centerPanel, BorderLayout.CENTER);
-
         // Add action listeners
-        addButton.addActionListener(e -> handleAddProduct(nameField, descField, priceField, stockField, weightField, colorField, dimensionsField));
+        addButton.addActionListener(e -> {
+            if (selectedImagePath == null) {
+                JOptionPane.showMessageDialog(this,
+                    "Please upload a product image!",
+                    "Validation Error",
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            handleAddProduct();
+        });
         cancelButton.addActionListener(e -> dispose());
 
-        // Add main panel to frame
+        // Wrap content panel in scroll pane
+        JScrollPane scrollPane = new JScrollPane(contentPanel);
+        scrollPane.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
+        scrollPane.setBorder(null);
+
+        // Add panels to main panel
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+
         add(mainPanel);
         setVisible(true);
+    }
+
+    private void handleImageUpload() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Image files", "jpg", "jpeg", "png", "gif"));
+        
+        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            selectedImagePath = selectedFile.getAbsolutePath();
+            
+            // Update preview
+            ImageIcon originalIcon = new ImageIcon(selectedImagePath);
+            Image image = originalIcon.getImage().getScaledInstance(
+                PREVIEW_WIDTH, PREVIEW_HEIGHT, Image.SCALE_SMOOTH);
+            imagePreview.setIcon(new ImageIcon(image));
+        }
+    }
+
+    private String saveImage(String sourcePath) {
+        try {
+            String fileName = UUID.randomUUID().toString() + getFileExtension(sourcePath);
+            String destinationPath = UPLOAD_DIR + fileName;
+            Files.copy(Paths.get(sourcePath), Paths.get(destinationPath), 
+                      StandardCopyOption.REPLACE_EXISTING);
+            return fileName;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private String getFileExtension(String path) {
+        String extension = "";
+        int i = path.lastIndexOf('.');
+        if (i > 0) {
+            extension = path.substring(i);
+        }
+        return extension;
     }
 
     private JPanel createGradientPanel() {
@@ -188,7 +255,6 @@ public class AddProductFrame extends JFrame {
         button.setFocusPainted(false);
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         
-        // Add hover effect
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(new Color(0, 71, 173));
@@ -202,42 +268,70 @@ public class AddProductFrame extends JFrame {
         return button;
     }
 
-    private void handleAddProduct(JTextField nameField, JTextField descField, 
-            JTextField priceField, JTextField stockField, JTextField weightField, 
-            JTextField colorField, JTextField dimensionsField) {
+    private void addFormField(JPanel panel, String labelText, JTextField field, GridBagConstraints gbc, int row) {
+        // Add label
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.weightx = 0.3;
+        gbc.anchor = GridBagConstraints.EAST;
+        panel.add(createStyledLabel(labelText), gbc);
         
+        // Add text field
+        gbc.gridx = 1;
+        gbc.weightx = 0.7;
+        gbc.anchor = GridBagConstraints.WEST;
+        panel.add(field, gbc);
+    }
+
+    private JTextField[] getAllFormFields() {
+        JPanel contentPanel = (JPanel) ((JScrollPane) getContentPane()
+            .getComponent(0)).getViewport().getView();
+        
+        JTextField[] fields = new JTextField[8];
+        int fieldIndex = 0;
+        
+        // Get all JTextFields from the content panel
+        for (Component comp : contentPanel.getComponents()) {
+            if (comp instanceof JTextField) {
+                fields[fieldIndex++] = (JTextField) comp;
+            }
+        }
+        
+        return fields;
+    }
+
+    private void handleAddProduct() {
         if (validateInputs(nameField, priceField, stockField)) {
             try {
+                String imageFileName = saveImage(selectedImagePath);
+                if (imageFileName == null) {
+                    JOptionPane.showMessageDialog(this,
+                        "Failed to save image!",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
                 String name = nameField.getText().trim();
-                String description = descField.getText().trim();
+                String description = descriptionField.getText().trim();
                 double price = Double.parseDouble(priceField.getText().trim());
                 int stock = Integer.parseInt(stockField.getText().trim());
-                Double weight = weightField.getText().isEmpty() ? null : Double.parseDouble(weightField.getText().trim());
-                String color = colorField.getText().isEmpty() ? null : colorField.getText().trim();
-                String dimensions = dimensionsField.getText().isEmpty() ? null : dimensionsField.getText().trim();
                 
                 String selectedCategory = (String) categoryComboBox.getSelectedItem();
                 Category category = getCategoryByName(selectedCategory);
 
                 Product product = new Product(
-                    0,
-                    name,
-                    description,
-                    price,
-                    stock,
-                    category,
-                    weight != null ? weight : 0.0,
-                    color,
-                    dimensions,
-                    0.0
+                    0, name, description, price, stock, category, 0.0
                 );
 
-                if (addProductToDatabase(product)) {
+                if (addProductToDatabase(product, imageFileName)) {
                     JOptionPane.showMessageDialog(this, 
                         "Product added successfully!", 
                         "Success", 
                         JOptionPane.INFORMATION_MESSAGE);
-                    clearFields(nameField, descField, priceField, stockField, weightField, colorField, dimensionsField);
+                    clearFields();
+                    imagePreview.setIcon(null);
+                    selectedImagePath = null;
                 } else {
                     JOptionPane.showMessageDialog(this,
                         "Failed to add product. Please try again.",
@@ -328,15 +422,18 @@ public class AddProductFrame extends JFrame {
         field.requestFocusInWindow();
     }
 
-    private void clearFields(JTextField... fields) {
-        for (JTextField field : fields) {
-            field.setText("");
-        }
+    private void clearFields() {
+        nameField.setText("");
+        descriptionField.setText("");
+        priceField.setText("");
+        stockField.setText("");
+        categoryComboBox.setSelectedIndex(0);
     }
 
-    private boolean addProductToDatabase(Product product) {
-        String sql = "INSERT INTO products (name, description, price, stock_quantity, category_id, weight, color, dimensions, discount_price) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private boolean addProductToDatabase(Product product, String imageFileName) {
+        String sql = "INSERT INTO products (name, description, price, stock_quantity, " +
+                    "category_id, discount_price, image_url) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
         
         try {
             db.connect();
@@ -346,11 +443,9 @@ public class AddProductFrame extends JFrame {
             pstmt.setString(2, product.getDescription());
             pstmt.setDouble(3, product.getPrice());
             pstmt.setInt(4, product.getStockQuantity());
-            pstmt.setString(5, product.getCategory().getCategoryID());
-            pstmt.setDouble(6, product.getWeight());
-            pstmt.setString(7, product.getColor());
-            pstmt.setString(8, product.getDimensions());
-            pstmt.setDouble(9, product.getDiscountPrice());
+            pstmt.setInt(5, Integer.parseInt(product.getCategory().getCategoryID())); // Convert to int
+            pstmt.setDouble(6, product.getDiscountPrice());
+            pstmt.setString(7, imageFileName);
 
             int result = pstmt.executeUpdate();
             return result > 0;

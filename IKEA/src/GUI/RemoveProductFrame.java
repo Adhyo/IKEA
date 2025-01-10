@@ -56,13 +56,14 @@ public class RemoveProductFrame extends JFrame {
         tablePanel.setOpaque(false);
 
         // Initialize table
-        String[] columnNames = {"ID", "Name", "Description", "Price", "Stock", "Weight", "Color", "Dimensions"};
+        String[] columnNames = {"ID", "Name", "Description", "Price", "Stock"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
             }
         };
+
         productTable = new JTable(tableModel);
         productTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         productTable.setBackground(Color.WHITE);
@@ -141,9 +142,6 @@ public class RemoveProductFrame extends JFrame {
                 row.add(rs.getString("description"));
                 row.add(String.format("Rp %.2f", rs.getDouble("price")));
                 row.add(rs.getInt("stock_quantity"));
-                row.add(rs.getDouble("weight"));
-                row.add(rs.getString("color"));
-                row.add(rs.getString("dimensions"));
                 tableModel.addRow(row);
             }
 
