@@ -2,6 +2,7 @@ package GUI;
 
 import Model.CartObserver;
 import Model.User;
+import GUI.EditProfileFrame;
 import javax.swing.*;
 import java.awt.*;
 import java.sql.PreparedStatement;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProductPanel extends JPanel {
+
     private final DatabaseManager db = DatabaseManager.getInstance();
     private JPanel productsGrid;
     private User currentUser;
@@ -25,15 +27,15 @@ public class ProductPanel extends JPanel {
     public ProductPanel(User user) {
         this.currentUser = user;
         setLayout(new BorderLayout());
-        
+
         JPanel mainPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g;
                 GradientPaint gradient = new GradientPaint(
-                    0, 0, new Color(0, 51, 153),
-                    getWidth(), getHeight(), new Color(0, 105, 255)
+                        0, 0, new Color(0, 51, 153),
+                        getWidth(), getHeight(), new Color(0, 105, 255)
                 );
                 g2d.setPaint(gradient);
                 g2d.fillRect(0, 0, getWidth(), getHeight());
@@ -42,7 +44,7 @@ public class ProductPanel extends JPanel {
         mainPanel.setLayout(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        JPanel headerPanel = createHeaderPanel();
+        JPanel headerPanel = createHeaderPanel(mainPanel);
         mainPanel.add(headerPanel, BorderLayout.NORTH);
 
         productsGrid = new JPanel(new GridBagLayout());
@@ -59,7 +61,7 @@ public class ProductPanel extends JPanel {
         loadProducts();
     }
 
-    private JPanel createHeaderPanel() {
+    private JPanel createHeaderPanel(JPanel mainPanel) {
         JPanel headerPanel = new JPanel(new BorderLayout(10, 10));
         headerPanel.setOpaque(false);
 
@@ -68,15 +70,25 @@ public class ProductPanel extends JPanel {
         headerLabel.setForeground(new Color(248, 209, 21));
         headerLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
+        // Button Panel
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.setOpaque(false);
+
+        JButton editProfileButton = createStyledButton("Edit Profile");
+        editProfileButton.addActionListener(e -> openEditProfilePanel());
+        buttonPanel.add(editProfileButton);
+
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         searchPanel.setOpaque(false);
-        
+
         JTextField searchField = new JTextField(20);
         searchField.setPreferredSize(new Dimension(200, 30));
-        
+
         JButton searchButton = new JButton("Search");
         styleButton(searchButton);
-        
+
         searchPanel.add(searchField);
         searchPanel.add(searchButton);
 
@@ -86,6 +98,16 @@ public class ProductPanel extends JPanel {
         searchButton.addActionListener(e -> searchProducts(searchField.getText()));
 
         return headerPanel;
+    }
+
+    private JButton createStyledButton(String text) {
+        JButton button = new JButton(text);
+        styleButton(button);
+        return button;
+    }
+
+    private void openEditProfilePanel() {
+        new EditProfileFrame(currentUser.getUserId(), currentUser.getUsername(), currentUser.getEmail());
     }
 
     private void loadProducts() {
@@ -104,13 +126,13 @@ public class ProductPanel extends JPanel {
 
             while (rs.next()) {
                 addProductCard(
-                    rs.getInt("product_id"),
-                    rs.getString("name"),
-                    rs.getString("description"),
-                    rs.getDouble("price"),
-                    rs.getInt("stock_quantity"),
-                    rs.getString("image_url"),
-                    gbc
+                        rs.getInt("product_id"),
+                        rs.getString("name"),
+                        rs.getString("description"),
+                        rs.getDouble("price"),
+                        rs.getInt("stock_quantity"),
+                        rs.getString("image_url"),
+                        gbc
                 );
 
                 gbc.gridx++;
@@ -131,21 +153,21 @@ public class ProductPanel extends JPanel {
         }
     }
 
-    private void addProductCard(int productId, String name, String description, 
+    private void addProductCard(int productId, String name, String description,
             double price, int stock, String imageUrl, GridBagConstraints gbc) {
-        
+
         JPanel card = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
-                    RenderingHints.VALUE_ANTIALIAS_ON);
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                        RenderingHints.VALUE_ANTIALIAS_ON);
                 g2d.setColor(new Color(255, 255, 255, 240));
-                g2d.fillRoundRect(0, 0, getWidth()-1, getHeight()-1, 15, 15);
+                g2d.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 15, 15);
             }
         };
-        
+
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
         card.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         card.setOpaque(false);
@@ -155,17 +177,17 @@ public class ProductPanel extends JPanel {
         imageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         imageLabel.setPreferredSize(new Dimension(IMAGE_WIDTH, IMAGE_HEIGHT));
         imageLabel.setMaximumSize(new Dimension(IMAGE_WIDTH, IMAGE_HEIGHT));
-        
+
         if (imageUrl != null && !imageUrl.isEmpty()) {
             File imageFile = new File(IMAGE_PATH + imageUrl);
             if (imageFile.exists()) {
                 ImageIcon originalIcon = new ImageIcon(imageFile.getAbsolutePath());
                 Image scaledImage = originalIcon.getImage().getScaledInstance(
-                    IMAGE_WIDTH, IMAGE_HEIGHT, Image.SCALE_SMOOTH);
+                        IMAGE_WIDTH, IMAGE_HEIGHT, Image.SCALE_SMOOTH);
                 imageLabel.setIcon(new ImageIcon(scaledImage));
             }
         }
-        
+
         if (imageLabel.getIcon() == null) {
             imageLabel.setText("No Image Available");
             imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -175,7 +197,7 @@ public class ProductPanel extends JPanel {
         JLabel nameLabel = createStyledLabel(name, 16, Font.BOLD);
         JLabel priceLabel = createStyledLabel(String.format("Rp %.2f", price), 14, Font.BOLD);
         JLabel stockLabel = createStyledLabel("Stock: " + stock, 12, Font.PLAIN);
-        
+
         JTextArea descArea = new JTextArea(description);
         descArea.setWrapStyleWord(true);
         descArea.setLineWrap(true);
@@ -194,13 +216,13 @@ public class ProductPanel extends JPanel {
         JButton addToCartBtn = new JButton("Add to Cart");
         styleButton(addToCartBtn);
         addToCartBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-        
+
         addToCartBtn.addActionListener(e -> {
             if (currentUser == null) {
                 JOptionPane.showMessageDialog(this,
-                    "Please login to add items to cart!",
-                    "Login Required",
-                    JOptionPane.WARNING_MESSAGE);
+                        "Please login to add items to cart!",
+                        "Login Required",
+                        JOptionPane.WARNING_MESSAGE);
                 return;
             }
             addToCart(productId, (Integer) quantitySpinner.getValue());
@@ -238,7 +260,7 @@ public class ProductPanel extends JPanel {
         button.setFocusPainted(false);
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         button.setPreferredSize(new Dimension(120, 30));
-        
+
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(new Color(0, 71, 173));
@@ -258,9 +280,9 @@ public class ProductPanel extends JPanel {
             String searchPattern = "%" + searchTerm + "%";
             pstmt.setString(1, searchPattern);
             pstmt.setString(2, searchPattern);
-            
+
             ResultSet rs = pstmt.executeQuery();
-            
+
             productsGrid.removeAll();
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.gridx = 0;
@@ -269,13 +291,13 @@ public class ProductPanel extends JPanel {
 
             while (rs.next()) {
                 addProductCard(
-                    rs.getInt("product_id"),
-                    rs.getString("name"),
-                    rs.getString("description"),
-                    rs.getDouble("price"),
-                    rs.getInt("stock_quantity"),
-                    rs.getString("image_url"),
-                    gbc
+                        rs.getInt("product_id"),
+                        rs.getString("name"),
+                        rs.getString("description"),
+                        rs.getDouble("price"),
+                        rs.getInt("stock_quantity"),
+                        rs.getString("image_url"),
+                        gbc
                 );
 
                 gbc.gridx++;
@@ -312,12 +334,12 @@ public class ProductPanel extends JPanel {
     private void addToCart(int productId, int quantity) {
         try {
             db.connect();
-            
+
             String cartQuery = "SELECT cart_id FROM carts WHERE user_id = ? AND cart_id NOT IN (SELECT cart_id FROM orders)";
             PreparedStatement cartStmt = db.con.prepareStatement(cartQuery);
             cartStmt.setInt(1, currentUser.getUserId());
             ResultSet cartRs = cartStmt.executeQuery();
-            
+
             int cartId;
             if (cartRs.next()) {
                 cartId = cartRs.getInt("cart_id");
@@ -326,7 +348,7 @@ public class ProductPanel extends JPanel {
                 PreparedStatement createCartStmt = db.con.prepareStatement(createCartQuery, PreparedStatement.RETURN_GENERATED_KEYS);
                 createCartStmt.setInt(1, currentUser.getUserId());
                 createCartStmt.executeUpdate();
-                
+
                 ResultSet generatedKeys = createCartStmt.getGeneratedKeys();
                 if (generatedKeys.next()) {
                     cartId = generatedKeys.getInt(1);
@@ -334,29 +356,29 @@ public class ProductPanel extends JPanel {
                     throw new SQLException("Failed to create cart");
                 }
             }
-            
-            String addProductQuery = "INSERT INTO cart_products (cart_id, product_id, quantity) VALUES (?, ?, ?) " +
-                                   "ON DUPLICATE KEY UPDATE quantity = quantity + ?";
+
+            String addProductQuery = "INSERT INTO cart_products (cart_id, product_id, quantity) VALUES (?, ?, ?) "
+                    + "ON DUPLICATE KEY UPDATE quantity = quantity + ?";
             PreparedStatement addProductStmt = db.con.prepareStatement(addProductQuery);
             addProductStmt.setInt(1, cartId);
             addProductStmt.setInt(2, productId);
             addProductStmt.setInt(3, quantity);
             addProductStmt.setInt(4, quantity);
             addProductStmt.executeUpdate();
-            
+
             JOptionPane.showMessageDialog(this,
-                "Product added to cart successfully!",
-                "Success",
-                JOptionPane.INFORMATION_MESSAGE);
+                    "Product added to cart successfully!",
+                    "Success",
+                    JOptionPane.INFORMATION_MESSAGE);
 
             notifyObservers();
-                
+
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this,
-                "Failed to add product to cart: " + e.getMessage(),
-                "Error",
-                JOptionPane.ERROR_MESSAGE);
+                    "Failed to add product to cart: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
         } finally {
             db.disconnect();
         }

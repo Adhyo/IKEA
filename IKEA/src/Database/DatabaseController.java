@@ -126,4 +126,85 @@ public class DatabaseController {
             db.disconnect();
         }
     }
+
+    public boolean updateUserProfile(int userId, String username, String email, String password) {
+        try {
+            db.connect();
+            
+            // Check if the new username already exists for a different user
+            String checkQuery = "SELECT user_id FROM users WHERE username = ? AND user_id != ?";
+            try (PreparedStatement checkStmt = db.con.prepareStatement(checkQuery)) {
+                checkStmt.setString(1, username);
+                checkStmt.setInt(2, userId);
+                
+                try (ResultSet rs = checkStmt.executeQuery()) {
+                    if (rs.next()) {
+                        return false; // Username already exists for another user
+                    }
+                }
+            }
+
+            // Prepare update query based on whether a new password is provided
+            String updateQuery;
+            if (password != null && !password.isEmpty()) {
+                updateQuery = "UPDATE users SET username = ?, email = ?, password = ? WHERE user_id = ?";
+            } else {
+                updateQuery = "UPDATE users SET username = ?, email = ? WHERE user_id = ?";
+            }
+
+            // Execute the update
+            try (PreparedStatement pstmt = db.con.prepareStatement(updateQuery)) {
+                pstmt.setString(1, username);
+                pstmt.setString(2, email);
+                
+                if (password != null && !password.isEmpty()) {
+                    pstmt.setString(3, password);
+                    pstmt.setInt(4, userId);
+                } else {
+                    pstmt.setInt(3, userId);
+                }
+
+                int rowsAffected = pstmt.executeUpdate();
+                return rowsAffected > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            db.disconnect();
+        }
+    }
+
+    public User getUserById(int userId) {
+        try {
+            db.connect();
+            String query = "SELECT * FROM users WHERE user_id = ?";
+            try (PreparedStatement pstmt = db.con.prepareStatement(query)) {
+                pstmt.setInt(1, userId);
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        String username = rs.getString("username");
+                        String password = rs.getString("password");
+                        String email = rs.getString("email");
+                        String userType = rs.getString("user_type");
+                        
+                        if (userType.equals("ADMIN")) {
+                            double income = rs.getDouble("income");
+                            return new Admin(userId, username, password, email, income);
+                        } else if (userType.equals("CUSTOMER")) {
+                            String name = rs.getString("name");
+                            String phone = rs.getString("phone");
+                            return new Customer(userId, username, password, email, name, phone);
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            db.disconnect();
+        }
+        return null;
+    }
 }
