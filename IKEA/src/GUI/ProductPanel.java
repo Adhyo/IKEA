@@ -82,6 +82,18 @@ public class ProductPanel extends JPanel {
             mainPanel.add(buttonPanel, BorderLayout.SOUTH);
         }
 
+        // Add notification button if user is logged in
+        if (currentUser != null) {
+            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+            buttonPanel.setOpaque(false);
+
+            JButton notificationButton = createStyledButton("Notifications");
+            notificationButton.addActionListener(e -> new CustomerNotificationsFrame(currentUser.getUserId()));
+            buttonPanel.add(notificationButton);
+
+            mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+        }
+        
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         searchPanel.setOpaque(false);
 
