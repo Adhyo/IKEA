@@ -70,7 +70,6 @@ public class ProductPanel extends JPanel {
         headerLabel.setForeground(new Color(248, 209, 21));
         headerLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
-        // Button Panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         buttonPanel.setOpaque(false);
 
@@ -79,6 +78,11 @@ public class ProductPanel extends JPanel {
         buttonPanel.add(editProfileButton);
 
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        JButton custHistoryButton = createStyledButton("Transaction History");
+        custHistoryButton.addActionListener(e -> openTransactionHistoryPanel());
+
+        buttonPanel.add(custHistoryButton);
 
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         searchPanel.setOpaque(false);
@@ -108,6 +112,10 @@ public class ProductPanel extends JPanel {
 
     private void openEditProfilePanel() {
         new EditProfileFrame(currentUser.getUserId(), currentUser.getUsername(), currentUser.getEmail());
+    }
+
+    private void openTransactionHistoryPanel() {
+        new CustTransactionHistory(currentUser.getUserId());
     }
 
     private void loadProducts() {

@@ -267,7 +267,7 @@ public class CheckoutPanel extends JPanel implements CartObserver {
                 JOptionPane.WARNING_MESSAGE);
             return;
         }
-
+    
         if (addressArea.getText().trim().isEmpty()) {
             JOptionPane.showMessageDialog(this,
                 "Please enter a delivery address",
@@ -275,19 +275,19 @@ public class CheckoutPanel extends JPanel implements CartObserver {
                 JOptionPane.WARNING_MESSAGE);
             return;
         }
-
+    
         try {
             db.connect();
-            
+    
             // Get cart ID
             String cartQuery = "SELECT cart_id FROM carts WHERE user_id = ? AND cart_id NOT IN (SELECT cart_id FROM orders)";
             PreparedStatement cartStmt = db.con.prepareStatement(cartQuery);
             cartStmt.setInt(1, currentUser.getUserId());
             ResultSet cartRs = cartStmt.executeQuery();
-            
+    
             if (cartRs.next()) {
                 int cartId = cartRs.getInt("cart_id");
-                
+    
                 // Create order
                 String orderQuery = "INSERT INTO orders (cart_id, address, price, status, promo_applied) VALUES (?, ?, ?, 'UNPAID', ?)";
                 PreparedStatement orderStmt = db.con.prepareStatement(orderQuery);
@@ -296,26 +296,27 @@ public class CheckoutPanel extends JPanel implements CartObserver {
                 orderStmt.setDouble(3, finalAmount);
                 orderStmt.setString(4, (String) promoComboBox.getSelectedItem());
                 orderStmt.executeUpdate();
-
-                // Create transaction record
-                String transQuery = "INSERT INTO transactions (cart_id, sub_total, discount_amount, final_amount, transaction_date) VALUES (?, ?, ?, ?, ?)";
+    
+                // Create transaction record with user_id
+                String transQuery = "INSERT INTO transactions (cart_id, user_id, sub_total, discount_amount, final_amount, transaction_date) VALUES (?, ?, ?, ?, ?, ?)";
                 PreparedStatement transStmt = db.con.prepareStatement(transQuery);
                 transStmt.setInt(1, cartId);
-                transStmt.setDouble(2, subtotalAmount);
-                transStmt.setDouble(3, discountAmount);
-                transStmt.setDouble(4, finalAmount);
-                transStmt.setDate(5, java.sql.Date.valueOf(LocalDate.now()));
+                transStmt.setInt(2, currentUser.getUserId());  // Insert user_id here
+                transStmt.setDouble(3, subtotalAmount);
+                transStmt.setDouble(4, discountAmount);
+                transStmt.setDouble(5, finalAmount);
+                transStmt.setDate(6, java.sql.Date.valueOf(LocalDate.now()));
                 transStmt.executeUpdate();
-                
+    
                 JOptionPane.showMessageDialog(this,
                     "Order placed successfully!\nPlease proceed with payment.",
                     "Success",
                     JOptionPane.INFORMATION_MESSAGE);
-                
+    
                 // Clear the checkout display
                 clearCheckout();
             }
-            
+    
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this,
@@ -326,6 +327,7 @@ public class CheckoutPanel extends JPanel implements CartObserver {
             db.disconnect();
         }
     }
+    
 
     private void handleCancel() {
         int confirm = JOptionPane.showConfirmDialog(this,
