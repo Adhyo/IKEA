@@ -127,35 +127,36 @@ public class EditProfileFrame extends JFrame {
         String newPassword = new String(passwordField.getPassword());
         String confirmPassword = new String(confirmPasswordField.getPassword());
         String newEmail = emailField.getText();
-
+    
         // Validation
         if (newUsername.isEmpty() || newEmail.isEmpty()) {
             showMessage("Error", "Username and email cannot be empty!", JOptionPane.ERROR_MESSAGE);
             return;
         }
-
+    
         if (!newPassword.isEmpty() && !newPassword.equals(confirmPassword)) {
             showMessage("Error", "Passwords do not match!", JOptionPane.ERROR_MESSAGE);
             return;
         }
-
+    
         if (!isValidEmail(newEmail)) {
             showMessage("Error", "Invalid email format!", JOptionPane.ERROR_MESSAGE);
             return;
         }
-
-        // Update profile
-        boolean updateSuccess = dbController.updateUserProfile(userId, newUsername, 
-                                                            newPassword.isEmpty() ? null : newPassword, 
-                                                            newEmail);
+    
+        // Update profile - FIXED: Pass newPassword instead of newEmail for the password parameter
+        boolean updateSuccess = dbController.updateUserProfile(
+            userId, 
+            newUsername,
+            newEmail,
+            newPassword.isEmpty() ? null : newPassword  // Only pass password if it's not empty
+        );
         
         if (updateSuccess) {
-            showMessage("Success", "Profile updated successfully!", 
-                       JOptionPane.INFORMATION_MESSAGE);
+            showMessage("Success", "Profile updated successfully!", JOptionPane.INFORMATION_MESSAGE);
             dispose();
         } else {
-            showMessage("Error", "Failed to update profile. Username might already be taken.", 
-                       JOptionPane.ERROR_MESSAGE);
+            showMessage("Error", "Failed to update profile. Username might already be taken.", JOptionPane.ERROR_MESSAGE);
         }
     }
 

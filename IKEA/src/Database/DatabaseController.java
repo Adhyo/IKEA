@@ -16,17 +16,32 @@ public class DatabaseController {
         try {
             db.connect();
             String query = "SELECT * FROM users WHERE username = ? AND password = ?";
+            
+            // Debug print
+            System.out.println("Attempting login with username: " + username);
+            
             try (PreparedStatement pstmt = db.con.prepareStatement(query)) {
                 pstmt.setString(1, username);
                 pstmt.setString(2, password);
-
+                
+                // Debug print the actual SQL query
+                System.out.println("Executing query: " + query);
+                System.out.println("With parameters: username=" + username + ", password=" + password);
+    
                 try (ResultSet rs = pstmt.executeQuery()) {
                     if (rs.next()) {
+                        // Debug print
+                        System.out.println("User found in database!");
+                        
                         int userId = rs.getInt("user_id");
                         String email = rs.getString("email");
                         String userType = rs.getString("user_type");
                         double income = rs.getDouble("income");
-
+    
+                        // Debug print
+                        System.out.println("Retrieved user ID: " + userId);
+                        System.out.println("User type: " + userType);
+    
                         // Create appropriate user object based on user_type
                         if (userType.equals("ADMIN")) {
                             return new Admin(userId, username, password, email, income);
@@ -35,10 +50,14 @@ public class DatabaseController {
                             String phone = rs.getString("phone");
                             return new Customer(userId, username, password, email, name, phone);
                         }
+                    } else {
+                        // Debug print
+                        System.out.println("No user found with these credentials");
                     }
                 }
             }
         } catch (SQLException e) {
+            System.out.println("SQL Exception occurred: " + e.getMessage());
             e.printStackTrace();
         } finally {
             try {
@@ -131,7 +150,14 @@ public class DatabaseController {
         try {
             db.connect();
             
-            // Check if the new username already exists for a different user
+            // Debug print
+            System.out.println("Attempting to update profile:");
+            System.out.println("UserID: " + userId);
+            System.out.println("New Username: " + username);
+            System.out.println("New Email: " + email);
+            System.out.println("Password being updated: " + (password != null && !password.isEmpty() ? "Yes" : "No"));
+            
+            // Check if the new username exists for a different user
             String checkQuery = "SELECT user_id FROM users WHERE username = ? AND user_id != ?";
             try (PreparedStatement checkStmt = db.con.prepareStatement(checkQuery)) {
                 checkStmt.setString(1, username);
@@ -139,42 +165,47 @@ public class DatabaseController {
                 
                 try (ResultSet rs = checkStmt.executeQuery()) {
                     if (rs.next()) {
-                        return false; // Username already exists for another user
+                        System.out.println("Update failed: Username already exists");
+                        return false;
                     }
                 }
             }
-
-            // Prepare update query based on whether a new password is provided
-            String updateQuery;
+    
+            // Build update query
+            StringBuilder updateQuery = new StringBuilder("UPDATE users SET username = ?, email = ?");
             if (password != null && !password.isEmpty()) {
-                updateQuery = "UPDATE users SET username = ?, email = ?, password = ? WHERE user_id = ?";
-            } else {
-                updateQuery = "UPDATE users SET username = ?, email = ? WHERE user_id = ?";
+                updateQuery.append(", password = ?");
             }
-
+            updateQuery.append(" WHERE user_id = ?");
+            
+            // Debug print
+            System.out.println("Executing update query: " + updateQuery.toString());
+    
             // Execute the update
-            try (PreparedStatement pstmt = db.con.prepareStatement(updateQuery)) {
-                pstmt.setString(1, username);
-                pstmt.setString(2, email);
+            try (PreparedStatement pstmt = db.con.prepareStatement(updateQuery.toString())) {
+                int paramIndex = 1;
+                pstmt.setString(paramIndex++, username);
+                pstmt.setString(paramIndex++, email);
                 
                 if (password != null && !password.isEmpty()) {
-                    pstmt.setString(3, password);
-                    pstmt.setInt(4, userId);
-                } else {
-                    pstmt.setInt(3, userId);
+                    pstmt.setString(paramIndex++, password);
+                    System.out.println("Setting new password in query");
                 }
-
+                pstmt.setInt(paramIndex, userId);
+    
                 int rowsAffected = pstmt.executeUpdate();
+                System.out.println("Rows affected by update: " + rowsAffected);
                 return rowsAffected > 0;
             }
         } catch (SQLException e) {
+            System.out.println("SQL Exception during update: " + e.getMessage());
             e.printStackTrace();
             return false;
         } finally {
             db.disconnect();
         }
     }
-
+    
     public User getUserById(int userId) {
         try {
             db.connect();
