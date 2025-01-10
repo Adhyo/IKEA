@@ -1,27 +1,27 @@
 package Model;
 
 public class Category {
-    private String categoryID;
-    private String categoryName;
+    private int category_id;
+    private String category_name;
     
-    public Category(String categoryID, String categoryName) {
-        this.categoryID = categoryID;
-        this.categoryName = categoryName;
+    public Category(int category_id, String category_name) {
+        this.category_id = category_id;
+        this.category_name = category_name;
     }
 
-    public String getCategoryID() {
-        return categoryID;
+    public int getCategoryId() {
+        return category_id;
     }
 
-    public void setCategoryID(String categoryID) {
-        this.categoryID = categoryID;
+    public void setCategoryId(int category_id) {
+        this.category_id = category_id;
     }
 
     public String getCategoryName() {
-        return categoryName;
+        return category_name;
     }
 
-    public void setCategoryName(String categoryName) {
-        this.categoryName = categoryName;
+    public void setCategoryName(String category_name) {
+        this.category_name = category_name;
     }
 }

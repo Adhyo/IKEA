@@ -1,10 +1,8 @@
 package Database;
 
-import Model.User;
-import Model.Admin;
-import Model.Customer;
-import Model.UserType;
+import Model.*;
 
+import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -280,5 +278,23 @@ public class DatabaseController {
             e.printStackTrace();
             return false;
         }
+    }
+    public List<Category> getAllCategories() {
+        List<Category> categories = new ArrayList<>();
+        String query = "SELECT * FROM categories"; // Update with your actual SQL query
+        
+        try (Connection connection = DatabaseManager.getConnection();
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
+
+            while (resultSet.next()) {
+                int id = resultSet.getInt("category_id");
+                String name = resultSet.getString("category_name");
+                categories.add(new Category(id, name));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return categories;
     }
 }

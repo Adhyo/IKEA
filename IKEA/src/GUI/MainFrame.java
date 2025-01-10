@@ -83,6 +83,11 @@ public class MainFrame extends JFrame {
             }
         }
 
+        menuBar.add(createMenuButton("Categories", KeyEvent.VK_C, e -> {
+            new CategoryFrame();
+            dispose(); // Open Category Frame
+        }));
+
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         rightPanel.setOpaque(false);
         if (currentUser == null) {

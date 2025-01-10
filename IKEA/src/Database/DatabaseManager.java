@@ -2,6 +2,8 @@ package Database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
+
 import javax.swing.JOptionPane;
 
 public class DatabaseManager {
@@ -11,12 +13,27 @@ public class DatabaseManager {
     private String url = "jdbc:mysql://localhost/ikea";
     private String username = "root";
     private String password = "";
+    private static Connection connection;
+
 
     // Private constructor
     private DatabaseManager() {
         // Initialize your database connection here if needed
     }
 
+    public static Connection getConnection() throws SQLException {
+        if (connection == null || connection.isClosed()) {
+            try {
+                // Load the MySQL driver
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                connection = DriverManager.getConnection("jdbc:mysql://localhost/ikea", "root", "");
+            } catch (ClassNotFoundException | SQLException e) {
+                e.printStackTrace();
+                throw new SQLException("Failed to establish a connection to the database.", e);
+            }
+        }
+        return connection;
+    }
     // Public static method untuk mendapatkan instance
     public static DatabaseManager getInstance() {
         if (instance == null) {
@@ -29,7 +46,7 @@ public class DatabaseManager {
         return instance;
     }
 
-    private Connection logOn() {
+    public Connection logOn() {
         try {
             Class.forName(driver);
             con = DriverManager.getConnection(url, username, password);
