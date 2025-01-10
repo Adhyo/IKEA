@@ -168,12 +168,34 @@ public class ProductPanel extends JPanel {
     private void openWishlistPanel() {
         JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
         if (parentFrame != null) {
+            // Create a new main panel with BorderLayout
+            JPanel mainContainer = new JPanel(new BorderLayout());
+            
+            // Create navigation panel
+            JPanel navPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+            navPanel.setBackground(new Color(0, 51, 153));
+            
+            JButton backButton = createStyledButton("Back to Products");
+            backButton.addActionListener(e -> {
+                parentFrame.getContentPane().removeAll();
+                parentFrame.add(this);
+                parentFrame.revalidate();
+                parentFrame.repaint();
+            });
+            
+            navPanel.add(backButton);
+            
+            // Add navigation and wishlist panel to main container
+            mainContainer.add(navPanel, BorderLayout.NORTH);
+            mainContainer.add(new WishlistPanel(currentUser), BorderLayout.CENTER);
+            
+            // Replace frame content
             parentFrame.getContentPane().removeAll();
-            parentFrame.add(new WishlistPanel(currentUser));
+            parentFrame.add(mainContainer);
             parentFrame.revalidate();
             parentFrame.repaint();
         }
-    }    
+    }
 
     private void loadProducts() {
         try {

@@ -15,6 +15,7 @@ public class WishlistPanel extends JPanel {
     private final User currentUser;
     private JTable wishlistTable;
     private DefaultTableModel tableModel;
+    private JPanel mainPanel;
 
     public WishlistPanel(User user) {
         this.currentUser = user;
@@ -211,6 +212,28 @@ public class WishlistPanel extends JPanel {
                 JOptionPane.ERROR_MESSAGE);
         } finally {
             db.disconnect();
+        }
+    }
+
+    public void addNavigationButton() {
+        JButton backToProducts = createStyledButton("Back to Products");
+        backToProducts.addActionListener(e -> {
+            JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+            if (parentFrame != null) {
+                parentFrame.getContentPane().removeAll();
+                parentFrame.add(new ProductPanel(currentUser));
+                parentFrame.revalidate();
+                parentFrame.repaint();
+            }
+        });
+        
+        // Add the button to the existing button panel
+        Component[] components = mainPanel.getComponents();
+        for (Component comp : components) {
+            if (comp instanceof JPanel && ((JPanel) comp).getLayout() instanceof FlowLayout) {
+                ((JPanel) comp).add(backToProducts);
+                break;
+            }
         }
     }
 
