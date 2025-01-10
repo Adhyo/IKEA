@@ -76,7 +76,7 @@ public class ProductPanel extends JPanel {
             JButton wishlistButton = createStyledButton("My Wishlist");
             
             custHistoryButton.addActionListener(e -> openTransactionHistoryPanel());
-            wishlistButton.addActionListener(e -> new WishlistPanel(currentUser));
+            wishlistButton.addActionListener(e -> openWishlistPanel());
             
             buttonPanel.add(custHistoryButton);
             buttonPanel.add(wishlistButton);
@@ -165,9 +165,15 @@ public class ProductPanel extends JPanel {
         new CustTransactionHistory(currentUser.getUserId());
     }
 
-    // private void openWishlistPanel() {
-    //     new WishlistPanel(currentUser, (MainFrame) SwingUtilities.getWindowAncestor(this));
-    // }
+    private void openWishlistPanel() {
+        JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        if (parentFrame != null) {
+            parentFrame.getContentPane().removeAll();
+            parentFrame.add(new WishlistPanel(currentUser));
+            parentFrame.revalidate();
+            parentFrame.repaint();
+        }
+    }    
 
     private void loadProducts() {
         try {
