@@ -5,11 +5,19 @@ import Model.Admin;
 import Model.Customer;
 import Model.UserType;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DatabaseController {
+
+    private Connection getConnection() throws SQLException {
+        db.connect();
+        return db.con;
+    }
     private static final DatabaseManager db = DatabaseManager.getInstance();
 
     public User authenticateUser(String username, String password) {
@@ -205,7 +213,7 @@ public class DatabaseController {
             db.disconnect();
         }
     }
-    
+
     public User getUserById(int userId) {
         try {
             db.connect();
@@ -237,5 +245,40 @@ public class DatabaseController {
             db.disconnect();
         }
         return null;
+    }
+
+    public List<String> getAllCustomerUsernames() {
+        List<String> usernames = new ArrayList<>();
+        String query = "SELECT username FROM users WHERE user_type = 'CUSTOMER'";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query);
+             ResultSet rs = pstmt.executeQuery()) {
+            
+            while (rs.next()) {
+                usernames.add(rs.getString("username"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return usernames;
+    }
+
+    public boolean sendNotification(String username, String message) {
+        String query = "INSERT INTO notifications (user_id, message) " +
+                      "SELECT user_id, ? FROM users WHERE username = ?";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+            
+            pstmt.setString(1, message);
+            pstmt.setString(2, username);
+            
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }
