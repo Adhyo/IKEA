@@ -144,12 +144,11 @@ public class EditProfileFrame extends JFrame {
             return;
         }
     
-        // Update profile - FIXED: Pass newPassword instead of newEmail for the password parameter
         boolean updateSuccess = dbController.updateUserProfile(
             userId, 
             newUsername,
             newEmail,
-            newPassword.isEmpty() ? null : newPassword  // Only pass password if it's not empty
+            newPassword.isEmpty() ? null : newPassword 
         );
         
         if (updateSuccess) {
