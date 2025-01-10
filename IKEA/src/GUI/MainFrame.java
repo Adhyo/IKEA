@@ -214,13 +214,6 @@ public class MainFrame extends JFrame {
         }
         cardLayout.show(mainPanel, "Checkout");
     }
-    
-    public void showWishlistPanel() {
-        contentPanel.removeAll();
-        contentPanel.add(new WishlistPanel(currentUser, this));
-        contentPanel.revalidate();
-        contentPanel.repaint();
-    }
 
     private void showAccessDeniedDialog() {
         JOptionPane.showMessageDialog(this,
