@@ -11,6 +11,8 @@ import Database.DatabaseManager;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 public class ProductPanel extends JPanel {
     private final DatabaseManager db = DatabaseManager.getInstance();
@@ -21,6 +23,7 @@ public class ProductPanel extends JPanel {
     private static final int IMAGE_WIDTH = 200;
     private static final int IMAGE_HEIGHT = 200;
     private static final int CARDS_PER_ROW = 3;
+    private static final int BEST_SELLER_THRESHOLD = 10;
 
     public ProductPanel(User user) {
         this.currentUser = user;
@@ -102,10 +105,73 @@ public class ProductPanel extends JPanel {
         return headerPanel;
     }
 
+    private JPanel createBestSellerBadge() {
+        JPanel badgePanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
+                GradientPaint gradient = new GradientPaint(
+                    0, 0, new Color(255, 215, 0),
+                    getWidth(), getHeight(), new Color(218, 165, 32)
+                );
+                g2d.setPaint(gradient);
+                g2d.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
+            }
+        };
+        
+        badgePanel.setPreferredSize(new Dimension(80, 25));
+        badgePanel.setMaximumSize(new Dimension(80, 25));
+        badgePanel.setLayout(new BorderLayout());
+        
+        JLabel badgeLabel = new JLabel("BEST SELLER", SwingConstants.CENTER);
+        badgeLabel.setFont(new Font("Arial", Font.BOLD, 10));
+        badgeLabel.setForeground(new Color(139, 69, 19));
+        badgePanel.add(badgeLabel, BorderLayout.CENTER);
+        
+        return badgePanel;
+    }
+
+    private Set<Integer> getBestSellerProducts() {
+        Set<Integer> bestSellers = new HashSet<>();
+        try {
+            db.connect();
+            String query = """
+                SELECT cp.product_id, SUM(cp.quantity) as total_sold 
+                FROM cart_products cp 
+                JOIN transactions t ON cp.cart_id = t.cart_id 
+                GROUP BY cp.product_id 
+                HAVING total_sold >= ?
+            """;
+            PreparedStatement pstmt = db.con.prepareStatement(query);
+            pstmt.setInt(1, BEST_SELLER_THRESHOLD);
+            ResultSet rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                bestSellers.add(rs.getInt("product_id"));
+            }
+            
+            rs.close();
+            pstmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            db.disconnect();
+        }
+        return bestSellers;
+    }
+
     private void searchProducts(String searchTerm) {
         try {
             db.connect();
-            String query = "SELECT * FROM products WHERE name LIKE ? OR description LIKE ?";
+            String query = """
+                SELECT p.*, w.name as warehouse_name, w.address as warehouse_address 
+                FROM products p 
+                LEFT JOIN warehouses w ON p.warehouse_id = w.warehouse_id 
+                WHERE p.name LIKE ? OR p.description LIKE ?
+            """;
             PreparedStatement pstmt = db.con.prepareStatement(query);
             String searchPattern = "%" + searchTerm + "%";
             pstmt.setString(1, searchPattern);
@@ -121,13 +187,15 @@ public class ProductPanel extends JPanel {
 
             while (rs.next()) {
                 addProductCard(
-                        rs.getInt("product_id"),
-                        rs.getString("name"),
-                        rs.getString("description"),
-                        rs.getDouble("price"),
-                        rs.getInt("stock_quantity"),
-                        rs.getString("image_url"),
-                        gbc
+                    rs.getInt("product_id"),
+                    rs.getString("name"),
+                    rs.getString("description"),
+                    rs.getDouble("price"),
+                    rs.getInt("stock_quantity"),
+                    rs.getString("image_url"),
+                    rs.getString("warehouse_name"),
+                    rs.getString("warehouse_address"),
+                    gbc
                 );
 
                 gbc.gridx++;
@@ -140,6 +208,8 @@ public class ProductPanel extends JPanel {
             productsGrid.revalidate();
             productsGrid.repaint();
 
+            rs.close();
+            pstmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -200,7 +270,11 @@ public class ProductPanel extends JPanel {
     private void loadProducts() {
         try {
             db.connect();
-            String query = "SELECT * FROM products";
+            String query = """
+                SELECT p.*, w.name as warehouse_name, w.address as warehouse_address 
+                FROM products p 
+                LEFT JOIN warehouses w ON p.warehouse_id = w.warehouse_id
+            """;
             PreparedStatement pstmt = db.con.prepareStatement(query);
             ResultSet rs = pstmt.executeQuery();
 
@@ -213,13 +287,15 @@ public class ProductPanel extends JPanel {
 
             while (rs.next()) {
                 addProductCard(
-                        rs.getInt("product_id"),
-                        rs.getString("name"),
-                        rs.getString("description"),
-                        rs.getDouble("price"),
-                        rs.getInt("stock_quantity"),
-                        rs.getString("image_url"),
-                        gbc
+                    rs.getInt("product_id"),
+                    rs.getString("name"),
+                    rs.getString("description"),
+                    rs.getDouble("price"),
+                    rs.getInt("stock_quantity"),
+                    rs.getString("image_url"),
+                    rs.getString("warehouse_name"),
+                    rs.getString("warehouse_address"),
+                    gbc
                 );
 
                 gbc.gridx++;
@@ -241,7 +317,8 @@ public class ProductPanel extends JPanel {
     }
 
     private void addProductCard(int productId, String name, String description,
-            double price, int stock, String imageUrl, GridBagConstraints gbc) {
+            double price, int stock, String imageUrl, String warehouseName,
+            String warehouseAddress, GridBagConstraints gbc) {
 
         JPanel card = new JPanel() {
             @Override
@@ -258,7 +335,16 @@ public class ProductPanel extends JPanel {
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
         card.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         card.setOpaque(false);
-        card.setPreferredSize(new Dimension(300, 480)); // Increased height for wishlist button
+        card.setPreferredSize(new Dimension(300, 520));
+
+        // Check if product is a best seller
+        Set<Integer> bestSellers = getBestSellerProducts();
+        if (bestSellers.contains(productId)) {
+            JPanel badgePanel = createBestSellerBadge();
+            badgePanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            card.add(badgePanel);
+            card.add(Box.createVerticalStrut(5));
+        }
 
         // Image
         JLabel imageLabel = createImageLabel(imageUrl);
@@ -268,6 +354,12 @@ public class ProductPanel extends JPanel {
         JLabel priceLabel = createStyledLabel(String.format("Rp %.2f", price), 14, Font.BOLD);
         JLabel stockLabel = createStyledLabel("Stock: " + stock, 12, Font.PLAIN);
         JTextArea descArea = createDescriptionArea(description);
+
+        // Warehouse info
+        JLabel warehouseLabel = null;
+        if (warehouseName != null && !warehouseName.isEmpty()) {
+            warehouseLabel = createStyledLabel("Available at: " + warehouseName, 12, Font.PLAIN);
+        }
 
         // Quantity spinner
         SpinnerModel spinnerModel = new SpinnerNumberModel(1, 1, stock, 1);
@@ -279,12 +371,9 @@ public class ProductPanel extends JPanel {
         JButton addToCartBtn = createStyledButton("Add to Cart");
         JButton wishlistBtn = createStyledButton("Add to Wishlist");
         
-        // Check if product is in wishlist and update button accordingly
         if (currentUser != null && isInWishlist(currentUser.getUserId(), productId)) {
             wishlistBtn.setText("Remove from Wishlist");
             wishlistBtn.setBackground(new Color(255, 102, 102));
-        } else {
-            wishlistBtn.setBackground(new Color(51, 153, 255));
         }
 
         addToCartBtn.addActionListener(e -> {
@@ -319,6 +408,10 @@ public class ProductPanel extends JPanel {
         card.add(priceLabel);
         card.add(Box.createVerticalStrut(5));
         card.add(stockLabel);
+        if (warehouseLabel != null) {
+            card.add(Box.createVerticalStrut(5));
+            card.add(warehouseLabel);
+        }
         card.add(Box.createVerticalStrut(10));
         card.add(quantitySpinner);
         card.add(Box.createVerticalStrut(10));
@@ -475,8 +568,6 @@ public class ProductPanel extends JPanel {
         }
     }
 
-
-    // Existing helper methods remain the same
     private JLabel createStyledLabel(String text, int size, int style) {
         JLabel label = new JLabel(text);
         label.setFont(new Font("Arial", style, size));
