@@ -14,6 +14,7 @@ public class MainFrame extends JFrame {
     private CartPanel cartPanel;
     private CheckoutPanel checkoutPanel;
     private ProductPanel productPanel;
+    private JPanel contentPanel;
 
     public static MainFrame getInstance() {
         return instance;
@@ -47,7 +48,11 @@ public class MainFrame extends JFrame {
             }
         };
         backgroundPanel.setLayout(new BorderLayout());
-
+        contentPanel = new JPanel(new BorderLayout());
+        contentPanel.setOpaque(false);
+        backgroundPanel.add(contentPanel, BorderLayout.CENTER);
+        
+        createCustomMenuBar();
         createCustomMenuBar();
         createMainPanel();
 
@@ -208,6 +213,13 @@ public class MainFrame extends JFrame {
             return;
         }
         cardLayout.show(mainPanel, "Checkout");
+    }
+    
+    public void showWishlistPanel() {
+        contentPanel.removeAll();
+        contentPanel.add(new WishlistPanel(currentUser, this));
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }
 
     private void showAccessDeniedDialog() {

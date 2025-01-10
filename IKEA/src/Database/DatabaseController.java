@@ -297,4 +297,57 @@ public class DatabaseController {
         }
         return categories;
     }
+
+    public boolean addToWishlist(int userId, int productId) {
+        try {
+            db.connect();
+            String query = "INSERT INTO wishlists (user_id, product_id) VALUES (?, ?)";
+            try (PreparedStatement pstmt = db.con.prepareStatement(query)) {
+                pstmt.setInt(1, userId);
+                pstmt.setInt(2, productId);
+                return pstmt.executeUpdate() > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            db.disconnect();
+        }
+    }
+    
+    public boolean removeFromWishlist(int userId, int productId) {
+        try {
+            db.connect();
+            String query = "DELETE FROM wishlists WHERE user_id = ? AND product_id = ?";
+            try (PreparedStatement pstmt = db.con.prepareStatement(query)) {
+                pstmt.setInt(1, userId);
+                pstmt.setInt(2, productId);
+                return pstmt.executeUpdate() > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            db.disconnect();
+        }
+    }
+    
+    public boolean isInWishlist(int userId, int productId) {
+        try {
+            db.connect();
+            String query = "SELECT 1 FROM wishlists WHERE user_id = ? AND product_id = ?";
+            try (PreparedStatement pstmt = db.con.prepareStatement(query)) {
+                pstmt.setInt(1, userId);
+                pstmt.setInt(2, productId);
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    return rs.next();
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            db.disconnect();
+        }
+    }
 }
