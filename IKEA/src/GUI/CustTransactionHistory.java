@@ -43,11 +43,11 @@ public class CustTransactionHistory extends JFrame {
         titleLabel.setForeground(Color.WHITE);
         mainPanel.add(titleLabel, BorderLayout.NORTH);
 
-        String[] columns = {"Transaction ID", "Cart ID", "Subtotal", "Final Amount", "Date", "Actions"};
+        String[] columns = {"Transaction ID", "Cart ID", "Subtotal", "Final Amount", "Date", "Actions", "Review"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column == 5; // Only the "Actions" column is editable
+                return column == 5 || column == 6; 
             }
         };
         transactionTable = new JTable(tableModel);
@@ -81,9 +81,14 @@ public class CustTransactionHistory extends JFrame {
             db = DatabaseManager.getInstance();
             db.connect();
 
-            String query = "SELECT * FROM transactions WHERE user_id = ? ORDER BY transaction_date DESC";
+            String query = "SELECT t.*, CASE WHEN r.rating IS NOT NULL THEN 'Already Reviewed' ELSE 'Write Review' END as review_status " +
+                          "FROM transactions t " +
+                          "LEFT JOIN reviews r ON t.transaction_id = r.transaction_id AND r.user_id = ? " +
+                          "WHERE t.user_id = ? ORDER BY t.transaction_date DESC";
+            
             PreparedStatement stmt = db.con.prepareStatement(query);
             stmt.setInt(1, customerID);
+            stmt.setInt(2, customerID);
             ResultSet rs = stmt.executeQuery();
 
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -95,13 +100,18 @@ public class CustTransactionHistory extends JFrame {
                     String.format("$%.2f", rs.getDouble("sub_total")),
                     String.format("$%.2f", rs.getDouble("final_amount")),
                     dateFormat.format(rs.getDate("transaction_date")),
-                    "Request Return"
+                    "Request Return",
+                    rs.getString("review_status")
                 };
                 tableModel.addRow(row);
             }
 
+            // Set up button renderers and editors for both Actions and Review columns
             transactionTable.getColumn("Actions").setCellRenderer(new ButtonRenderer());
-            transactionTable.getColumn("Actions").setCellEditor(new ButtonEditor(new JCheckBox(), customerID));
+            transactionTable.getColumn("Actions").setCellEditor(new ButtonEditor(new JCheckBox(), customerID, "return"));
+            
+            transactionTable.getColumn("Review").setCellRenderer(new ButtonRenderer());
+            transactionTable.getColumn("Review").setCellEditor(new ButtonEditor(new JCheckBox(), customerID, "review"));
 
             rs.close();
             stmt.close();
@@ -132,10 +142,12 @@ public class CustTransactionHistory extends JFrame {
         private String label;
         private boolean isPushed;
         private int customerID;
+        private String actionType;
 
-        public ButtonEditor(JCheckBox checkBox, int customerID) {
+        public ButtonEditor(JCheckBox checkBox, int customerID, String actionType) {
             super(checkBox);
             this.customerID = customerID;
+            this.actionType = actionType;
             button = new JButton();
             button.setOpaque(true);
             button.addActionListener(e -> fireEditingStopped());
@@ -152,8 +164,17 @@ public class CustTransactionHistory extends JFrame {
         @Override
         public Object getCellEditorValue() {
             if (isPushed) {
-                int transactionID = (int) tableModel.getValueAt(transactionTable.getSelectedRow(), 0);
-                requestReturn(transactionID);
+                int row = transactionTable.getSelectedRow();
+                int transactionID = (int) tableModel.getValueAt(row, 0);
+                
+                if (actionType.equals("return")) {
+                    requestReturn(transactionID);
+                } else if (actionType.equals("review")) {
+                    if (!label.equals("Already Reviewed")) {
+                        new CustomerReviewFrame(customerID, transactionID);
+                        loadTransactions(); // Refresh the table after opening review window
+                    }
+                }
             }
             isPushed = false;
             return label;

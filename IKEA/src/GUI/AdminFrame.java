@@ -50,6 +50,7 @@ public class AdminFrame extends JFrame {
         JButton transactionHistoryButton = createStyledButton("Transaction History", true);
         JButton viewIncomeButton = createStyledButton("View Income", true);
         JButton viewReturnRequest = createStyledButton("View Return Request", true);
+        JButton viewReviewButton = createStyledButton("View Review", true);
 
         buttonPanel.add(addProductButton);
         buttonPanel.add(removeProductButton);
@@ -59,6 +60,7 @@ public class AdminFrame extends JFrame {
         buttonPanel.add(transactionHistoryButton);
         buttonPanel.add(viewIncomeButton);
         buttonPanel.add(viewReturnRequest);
+        buttonPanel.add(viewReviewButton);
 
         mainPanel.add(buttonPanel, BorderLayout.CENTER);
 
@@ -73,6 +75,7 @@ public class AdminFrame extends JFrame {
         transactionHistoryButton.addActionListener(e -> new TransactionHistoryFrame());
         viewIncomeButton.addActionListener(e -> new CalculateIncome());
         viewReturnRequest.addActionListener(e -> new AdminReturnFrame());
+        viewReviewButton.addActionListener(e -> new AdminReviewFrame());
 
         add(mainPanel);
         setVisible(true);
