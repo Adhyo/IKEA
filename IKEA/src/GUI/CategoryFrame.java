@@ -1,7 +1,7 @@
 package GUI;
 
 import Model.Category;
-import Model.Product;
+import Model.User;
 import Database.DatabaseController;
 
 import javax.swing.*;
@@ -11,8 +11,10 @@ import java.util.List;
 
 public class CategoryFrame extends JFrame {
     private DatabaseController dbController;
+    private User currentUser;
 
-    public CategoryFrame() {
+    public CategoryFrame(User user) {
+        this.currentUser = user;
         dbController = new DatabaseController();
 
         try {
@@ -44,7 +46,6 @@ public class CategoryFrame extends JFrame {
 
         createCustomMenuBar();
 
-        // Main content panel with grid layout
         JPanel categoryPanel = new JPanel(new GridLayout(0, 3, 15, 15));
         categoryPanel.setOpaque(false);
 
@@ -61,7 +62,6 @@ public class CategoryFrame extends JFrame {
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         backgroundPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Add a welcome header
         JLabel welcomeLabel = new JLabel("Browse Categories", SwingConstants.CENTER);
         welcomeLabel.setFont(new Font("Arial", Font.BOLD, 28));
         welcomeLabel.setForeground(new Color(248, 209, 21));
@@ -88,7 +88,7 @@ public class CategoryFrame extends JFrame {
         JButton viewButton = new JButton("View Products");
         styleButton(viewButton);
         viewButton.addActionListener(e -> {
-            new ProductFrame(category);
+            new ProductFrame(category, currentUser);
             dispose();
         });
 
@@ -128,9 +128,18 @@ public class CategoryFrame extends JFrame {
         menuBar.add(titleLabel);
 
         menuBar.add(createMenuButton("Home", KeyEvent.VK_H, e -> {
-            new MainFrame(null);
+            new MainFrame(currentUser);
             dispose();
         }));
+
+        if (currentUser != null) {
+            menuBar.add(createMenuButton("Cart", KeyEvent.VK_C, e -> {
+                MainFrame mainFrame = MainFrame.getInstance();
+                if (mainFrame != null) {
+                    mainFrame.showCartPanel();
+                }
+            }));
+        }
 
         menuBar.add(Box.createHorizontalGlue());
         setJMenuBar(menuBar);

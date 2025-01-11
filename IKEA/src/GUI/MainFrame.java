@@ -89,7 +89,7 @@ public class MainFrame extends JFrame {
         }
 
         menuBar.add(createMenuButton("Categories", KeyEvent.VK_C, e -> {
-            new CategoryFrame();
+            new CategoryFrame(currentUser);
             dispose();
         }));
 
@@ -220,5 +220,9 @@ public class MainFrame extends JFrame {
                 "Please login to access this feature!",
                 "Access Denied",
                 JOptionPane.WARNING_MESSAGE);
+    }
+
+    public CartPanel getCartPanel() {
+        return cartPanel;
     }
 }

@@ -1,21 +1,33 @@
 package GUI;
 
+import Model.CartObserver;
 import Model.Category;
 import Model.Product;
+import Model.User;
 import Database.DatabaseController;
+import Database.DatabaseManager;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProductFrame extends JFrame {
     private Category category;
+    private final List<CartObserver> observers = new ArrayList<>();
     private DatabaseController dbController;
+    private DatabaseManager db;
+    private User currentUser;
 
-    public ProductFrame(Category category) {
+    public ProductFrame(Category category, User user) {
         this.category = category;
-        dbController = new DatabaseController();
+        this.currentUser = user;
+        this.dbController = new DatabaseController();
+        this.db = DatabaseManager.getInstance();
 
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -34,9 +46,8 @@ public class ProductFrame extends JFrame {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g;
                 GradientPaint gradient = new GradientPaint(
-                    0, 0, new Color(0, 51, 153),
-                    getWidth(), getHeight(), new Color(0, 105, 255)
-                );
+                        0, 0, new Color(0, 51, 153),
+                        getWidth(), getHeight(), new Color(0, 105, 255));
                 g2d.setPaint(gradient);
                 g2d.fillRect(0, 0, getWidth(), getHeight());
             }
@@ -77,56 +88,171 @@ public class ProductFrame extends JFrame {
         card.setLayout(new BorderLayout(10, 10));
         card.setBackground(new Color(255, 255, 255, 30));
         card.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(248, 209, 21), 1),
-            BorderFactory.createEmptyBorder(15, 15, 15, 15)
-        ));
+                BorderFactory.createLineBorder(new Color(248, 209, 21), 1),
+                BorderFactory.createEmptyBorder(15, 15, 15, 15)));
+        card.setPreferredSize(new Dimension(400, 500));
+
+        JLabel imageLabel = new JLabel();
+        imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        ImageIcon productImage = loadProductImage(product);
+        if (productImage != null) {
+            imageLabel.setIcon(productImage);
+        }
+        card.add(imageLabel, BorderLayout.NORTH);
 
         JPanel detailsPanel = new JPanel();
         detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
         detailsPanel.setOpaque(false);
 
-        addStyledLabel(detailsPanel, "Name: " + product.getName(), Font.BOLD, 16);
-        addStyledLabel(detailsPanel, "Description: " + product.getDescription(), Font.PLAIN, 14);
-        
-        JPanel pricePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        pricePanel.setOpaque(false);
-        
-        if (product.getDiscountPrice() < product.getPrice()) {
-            JLabel originalPrice = new JLabel("$" + product.getPrice());
-            originalPrice.setFont(new Font("Arial", Font.PLAIN, 14));
-            originalPrice.setForeground(Color.LIGHT_GRAY);
-            originalPrice.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
-            
-            JLabel discountPrice = new JLabel("$" + product.getDiscountPrice());
-            discountPrice.setFont(new Font("Arial", Font.BOLD, 16));
-            discountPrice.setForeground(new Color(248, 209, 21));
-            
-            pricePanel.add(new JLabel("Price: "));
-            pricePanel.add(originalPrice);
-            pricePanel.add(new JLabel(" → "));
-            pricePanel.add(discountPrice);
-        } else {
-            addStyledLabel(detailsPanel, "Price: $" + product.getPrice(), Font.BOLD, 16);
-        }
-        
-        detailsPanel.add(pricePanel);
-        addStyledLabel(detailsPanel, "Stock: " + product.getStockQuantity(), Font.PLAIN, 14);
+        JLabel nameLabel = new JLabel(product.getName());
+        nameLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        nameLabel.setForeground(Color.WHITE);
+        nameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        detailsPanel.add(nameLabel);
+        detailsPanel.add(Box.createVerticalStrut(10));
+
+        JTextArea descArea = new JTextArea(product.getDescription());
+        descArea.setWrapStyleWord(true);
+        descArea.setLineWrap(true);
+        descArea.setOpaque(false);
+        descArea.setEditable(false);
+        descArea.setForeground(Color.WHITE);
+        descArea.setFont(new Font("Arial", Font.PLAIN, 14));
+        descArea.setAlignmentX(Component.CENTER_ALIGNMENT);
+        detailsPanel.add(descArea);
+        detailsPanel.add(Box.createVerticalStrut(10));
+
+        JLabel priceLabel = new JLabel(String.format("Price: $%.2f", product.getPrice()));
+        priceLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        priceLabel.setForeground(Color.WHITE);
+        priceLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        detailsPanel.add(priceLabel);
+        detailsPanel.add(Box.createVerticalStrut(10));
+
+        card.add(detailsPanel, BorderLayout.CENTER);
 
         JButton addToCartButton = new JButton("Add to Cart");
         styleButton(addToCartButton);
-        
-        card.add(detailsPanel, BorderLayout.CENTER);
-        card.add(addToCartButton, BorderLayout.SOUTH);
+        addToCartButton.addActionListener(e -> {
+            if (currentUser == null) {
+                JOptionPane.showMessageDialog(this,
+                        "Please login to add items to cart",
+                        "Login Required",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            try {
+                db.connect();
+                String cartQuery = "SELECT cart_id FROM carts WHERE user_id = ? AND cart_id NOT IN (SELECT cart_id FROM orders)";
+                PreparedStatement cartStmt = db.con.prepareStatement(cartQuery);
+                cartStmt.setInt(1, currentUser.getUserId());
+                ResultSet cartRs = cartStmt.executeQuery();
+
+                int cartId;
+                if (cartRs.next()) {
+                    cartId = cartRs.getInt("cart_id");
+                } else {
+                    String createCartQuery = "INSERT INTO carts (user_id) VALUES (?)";
+                    PreparedStatement createCartStmt = db.con.prepareStatement(createCartQuery,
+                            PreparedStatement.RETURN_GENERATED_KEYS);
+                    createCartStmt.setInt(1, currentUser.getUserId());
+                    createCartStmt.executeUpdate();
+
+                    ResultSet generatedKeys = createCartStmt.getGeneratedKeys();
+                    if (generatedKeys.next()) {
+                        cartId = generatedKeys.getInt(1);
+                    } else {
+                        throw new SQLException("Failed to create cart");
+                    }
+                }
+
+                String addProductQuery = "INSERT INTO cart_products (cart_id, product_id, quantity) VALUES (?, ?, ?) " +
+                        "ON DUPLICATE KEY UPDATE quantity = quantity + ?";
+                PreparedStatement addProductStmt = db.con.prepareStatement(addProductQuery);
+                addProductStmt.setInt(1, cartId);
+                addProductStmt.setInt(2, product.getProductId());
+                addProductStmt.setInt(3, 1);
+                addProductStmt.setInt(4, 1);
+                addProductStmt.executeUpdate();
+
+                JOptionPane.showMessageDialog(this,
+                        "Product added to cart successfully!",
+                        "Success",
+                        JOptionPane.INFORMATION_MESSAGE);
+
+                notifyObservers();
+
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this,
+                        "Error adding product to cart: " + ex.getMessage(),
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            } finally {
+                db.disconnect();
+            }
+        });
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.setOpaque(false);
+        buttonPanel.add(addToCartButton);
+        card.add(buttonPanel, BorderLayout.SOUTH);
 
         return card;
     }
 
-    private void addStyledLabel(JPanel panel, String text, int style, int size) {
-        JLabel label = new JLabel(text);
-        label.setFont(new Font("Arial", style, size));
-        label.setForeground(Color.WHITE);
-        label.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
-        panel.add(label);
+    private ImageIcon loadProductImage(Product product) {
+        try {
+            String imagePath = "/images/products/" + product.getProductId() + ".jpg";
+            java.net.URL imageURL = getClass().getResource(imagePath);
+
+            if (imageURL != null) {
+                ImageIcon originalIcon = new ImageIcon(imageURL);
+                Image scaledImage = originalIcon.getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
+                return new ImageIcon(scaledImage);
+            }
+
+            return createPlaceholder(200, 200);
+        } catch (Exception e) {
+            return createPlaceholder(200, 200);
+        }
+    }
+
+    private void notifyObservers() {
+        for (CartObserver observer : observers) {
+            observer.onCartUpdated();
+        }
+    }
+
+    private ImageIcon createPlaceholder(int width, int height) {
+        JPanel placeholderPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.setColor(new Color(200, 200, 200));
+                g.fillRect(0, 0, width, height);
+                g.setColor(new Color(0, 51, 153));
+                g.setFont(new Font("Arial", Font.BOLD, 24));
+                String text = "IKEA";
+                FontMetrics fm = g.getFontMetrics();
+                g.drawString(text,
+                        (width - fm.stringWidth(text)) / 2,
+                        (height + fm.getAscent()) / 2);
+            }
+        };
+        placeholderPanel.setPreferredSize(new Dimension(width, height));
+
+        placeholderPanel.setSize(width, height);
+        placeholderPanel.setBackground(Color.WHITE);
+
+        Image image = new java.awt.image.BufferedImage(
+                width, height, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = (Graphics2D) image.getGraphics();
+        placeholderPanel.paint(g2d);
+        g2d.dispose();
+
+        return new ImageIcon(image);
     }
 
     private void styleButton(JButton button) {
@@ -159,14 +285,23 @@ public class ProductFrame extends JFrame {
         menuBar.add(titleLabel);
 
         menuBar.add(createMenuButton("Categories", KeyEvent.VK_C, e -> {
-            new CategoryFrame();
+            new CategoryFrame(currentUser);
             dispose();
         }));
 
         menuBar.add(createMenuButton("Home", KeyEvent.VK_H, e -> {
-            new MainFrame(null);
+            new MainFrame(currentUser);
             dispose();
         }));
+
+        if (currentUser != null) {
+            menuBar.add(createMenuButton("Cart", KeyEvent.VK_T, e -> {
+                MainFrame mainFrame = MainFrame.getInstance();
+                if (mainFrame != null) {
+                    mainFrame.showCartPanel();
+                }
+            }));
+        }
 
         menuBar.add(Box.createHorizontalGlue());
         setJMenuBar(menuBar);
