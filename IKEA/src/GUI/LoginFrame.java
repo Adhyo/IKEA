@@ -111,7 +111,7 @@ public class LoginFrame extends JFrame {
                     }
                 } else {
                     showCustomDialog("Login Gagal",
-                            "Username atau password salah!\nSilakan coba lagi.",
+                            "Username atau password tidak terdaftar!\nSilakan coba lagi.",
                             JOptionPane.ERROR_MESSAGE);
                 }
             }

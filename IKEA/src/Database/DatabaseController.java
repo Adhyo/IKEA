@@ -30,6 +30,7 @@ public class DatabaseController {
                 pstmt.setString(1, username);
                 pstmt.setString(2, password);
 
+
                 System.out.println("Executing query: " + query);
                 System.out.println("With parameters: username=" + username + ", password=" + password);
 
@@ -41,6 +42,11 @@ public class DatabaseController {
                         String email = rs.getString("email");
                         String userType = rs.getString("user_type");
                         double income = rs.getDouble("income");
+                        int is_active = rs.getInt("is_active");
+
+                        if(is_active == 0) {
+                            return null;
+                        }
 
                         System.out.println("Retrieved user ID: " + userId);
                         System.out.println("User type: " + userType);

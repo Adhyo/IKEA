@@ -81,7 +81,7 @@ public class ManageUserFrame extends JFrame {
         try {
             DatabaseManager.getInstance().connect();
             Statement stmt = DatabaseManager.getInstance().con.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM users");
+            ResultSet rs = stmt.executeQuery("SELECT * FROM users WHERE user_type != 'ADMIN'");
             
             while (rs.next()) {
                 tableModel.addRow(new Object[]{
