@@ -52,13 +52,11 @@ public class CartPanel extends JPanel implements CartObserver {
         headerLabel.setForeground(new Color(248, 209, 21));
         headerPanel.add(headerLabel);
 
-        // Table Panel
         createTablePanel();
         JScrollPane scrollPane = new JScrollPane(cartTable);
         scrollPane.setOpaque(false);
         scrollPane.getViewport().setOpaque(false);
 
-        // Total Panel
         JPanel totalPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         totalPanel.setOpaque(false);
         totalLabel = new JLabel("Total: $0.00");
@@ -66,7 +64,6 @@ public class CartPanel extends JPanel implements CartObserver {
         totalLabel.setForeground(new Color(248, 209, 21));
         totalPanel.add(totalLabel);
 
-        // Button Panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
         buttonPanel.setOpaque(false);
         
@@ -80,13 +77,11 @@ public class CartPanel extends JPanel implements CartObserver {
         buttonPanel.add(clearCartButton);
         buttonPanel.add(removeItemButton);
 
-        // Add action listeners
         editButton.addActionListener(e -> showEditDialog());
         checkoutButton.addActionListener(e -> proceedToCheckout());
         clearCartButton.addActionListener(e -> clearCart());
         removeItemButton.addActionListener(e -> removeSelectedItem());
 
-        // Combine panels
         JPanel southPanel = new JPanel(new BorderLayout(10, 10));
         southPanel.setOpaque(false);
         southPanel.add(totalPanel, BorderLayout.CENTER);
@@ -105,7 +100,7 @@ public class CartPanel extends JPanel implements CartObserver {
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Make all cells non-editable (editing through dialog)
+                return false;
             }
         };
         
@@ -115,7 +110,6 @@ public class CartPanel extends JPanel implements CartObserver {
         cartTable.setRowHeight(25);
         cartTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
         
-        // Enable row selection
         cartTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
 
@@ -129,19 +123,16 @@ public class CartPanel extends JPanel implements CartObserver {
             return;
         }
 
-        // Get current values
         int productId = (int) tableModel.getValueAt(selectedRow, 0);
         String productName = (String) tableModel.getValueAt(selectedRow, 1);
         double price = (double) tableModel.getValueAt(selectedRow, 2);
         int currentQuantity = (int) tableModel.getValueAt(selectedRow, 3);
 
-        // Create edit dialog
         editDialog = new JDialog(mainFrame, "Edit Cart Item", true);
         editDialog.setLayout(new BorderLayout(10, 10));
         editDialog.setSize(300, 200);
         editDialog.setLocationRelativeTo(this);
 
-        // Create content panel with gradient
         JPanel contentPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -164,7 +155,6 @@ public class CartPanel extends JPanel implements CartObserver {
         gbc.anchor = GridBagConstraints.WEST;
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        // Add product details
         JLabel nameLabel = new JLabel("Product: " + productName);
         nameLabel.setForeground(Color.WHITE);
         contentPanel.add(nameLabel, gbc);
@@ -185,7 +175,6 @@ public class CartPanel extends JPanel implements CartObserver {
         quantitySpinner.setPreferredSize(new Dimension(80, 25));
         contentPanel.add(quantitySpinner, gbc);
 
-        // Button panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         buttonPanel.setOpaque(false);
         
@@ -211,7 +200,6 @@ public class CartPanel extends JPanel implements CartObserver {
         try {
             db.connect();
             
-            // Get cart ID
             String cartQuery = "SELECT cart_id FROM carts WHERE user_id = ? AND cart_id NOT IN (SELECT cart_id FROM orders)";
             PreparedStatement cartStmt = db.con.prepareStatement(cartQuery);
             cartStmt.setInt(1, currentUser.getUserId());
@@ -220,24 +208,20 @@ public class CartPanel extends JPanel implements CartObserver {
             if (cartRs.next()) {
                 int cartId = cartRs.getInt("cart_id");
                 
-                // Update quantity
                 String updateQuery = "UPDATE cart_products SET quantity = ? WHERE cart_id = ? AND product_id = ?";
                 PreparedStatement updateStmt = db.con.prepareStatement(updateQuery);
                 updateStmt.setInt(1, newQuantity);
                 updateStmt.setInt(2, cartId);
                 updateStmt.setInt(3, productId);
                 updateStmt.executeUpdate();
-                
-                // Update display
+
                 double price = (double) tableModel.getValueAt(row, 2);
                 double newSubtotal = price * newQuantity;
                 tableModel.setValueAt(newQuantity, row, 3);
                 tableModel.setValueAt(newSubtotal, row, 4);
                 
-                // Update total
                 calculateTotal();
                 
-                // Notify observers of the change
                 notifyObservers();
             }
             
@@ -300,12 +284,7 @@ public class CartPanel extends JPanel implements CartObserver {
                 JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
-        // Notify observers (including CheckoutPanel) that they should update
         notifyObservers();
-        
-        // Trigger the main application to switch to the checkout panel
-        // This should be handled by your main application frame
         MainFrame.getInstance().showCheckoutPanel();
     }
 
@@ -317,7 +296,6 @@ public class CartPanel extends JPanel implements CartObserver {
             
             db.connect();
             
-            // Get cart ID
             String cartQuery = "SELECT cart_id FROM carts WHERE user_id = ? AND cart_id NOT IN (SELECT cart_id FROM orders)";
             PreparedStatement cartStmt = db.con.prepareStatement(cartQuery);
             cartStmt.setInt(1, currentUser.getUserId());
@@ -325,23 +303,16 @@ public class CartPanel extends JPanel implements CartObserver {
             
             if (cartRs.next()) {
                 int cartId = cartRs.getInt("cart_id");
-                
-                // Update quantity
                 String updateQuery = "UPDATE cart_products SET quantity = ? WHERE cart_id = ? AND product_id = ?";
                 PreparedStatement updateStmt = db.con.prepareStatement(updateQuery);
                 updateStmt.setInt(1, quantity);
                 updateStmt.setInt(2, cartId);
                 updateStmt.setInt(3, productId);
                 updateStmt.executeUpdate();
-                
-                // Update subtotal in table
+
                 double subtotal = price * quantity;
                 tableModel.setValueAt(subtotal, row, 4);
-                
-                // Update total
                 calculateTotal();
-                
-                // Notify observers of the change
                 notifyObservers();
             }
             
@@ -375,28 +346,21 @@ public class CartPanel extends JPanel implements CartObserver {
         if (confirm == JOptionPane.YES_OPTION) {
             try {
                 db.connect();
-                
-                // Get cart ID
                 String cartQuery = "SELECT cart_id FROM carts WHERE user_id = ? AND cart_id NOT IN (SELECT cart_id FROM orders)";
                 PreparedStatement cartStmt = db.con.prepareStatement(cartQuery);
                 cartStmt.setInt(1, currentUser.getUserId());
                 ResultSet cartRs = cartStmt.executeQuery();
-                
                 if (cartRs.next()) {
                     int cartId = cartRs.getInt("cart_id");
-                    
-                    // Delete all items
                     String deleteQuery = "DELETE FROM cart_products WHERE cart_id = ?";
                     PreparedStatement deleteStmt = db.con.prepareStatement(deleteQuery);
                     deleteStmt.setInt(1, cartId);
                     deleteStmt.executeUpdate();
                     
-                    // Clear the display
                     tableModel.setRowCount(0);
                     totalAmount = 0.0;
                     updateTotalLabel();
                     
-                    // Notify observers of the change
                     notifyObservers();
                 }
                 
@@ -423,7 +387,6 @@ public class CartPanel extends JPanel implements CartObserver {
             
             int productId = (int) tableModel.getValueAt(selectedRow, 0);
             
-            // Get cart ID
             String cartQuery = "SELECT cart_id FROM carts WHERE user_id = ? AND cart_id NOT IN (SELECT cart_id FROM orders)";
             PreparedStatement cartStmt = db.con.prepareStatement(cartQuery);
             cartStmt.setInt(1, currentUser.getUserId());
@@ -431,19 +394,13 @@ public class CartPanel extends JPanel implements CartObserver {
             
             if (cartRs.next()) {
                 int cartId = cartRs.getInt("cart_id");
-                
-                // Delete item
                 String deleteQuery = "DELETE FROM cart_products WHERE cart_id = ? AND product_id = ?";
                 PreparedStatement deleteStmt = db.con.prepareStatement(deleteQuery);
                 deleteStmt.setInt(1, cartId);
                 deleteStmt.setInt(2, productId);
                 deleteStmt.executeUpdate();
-                
-                // Remove from table
                 tableModel.removeRow(selectedRow);
                 calculateTotal();
-                
-                // Notify observers of the change
                 notifyObservers();
             }
             

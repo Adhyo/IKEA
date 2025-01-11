@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 11, 2025 at 01:34 AM
+-- Generation Time: Jan 11, 2025 at 04:02 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -38,7 +38,6 @@ CREATE TABLE `carts` (
 
 INSERT INTO `carts` (`cart_id`, `user_id`) VALUES
 (3, 2),
-(16, 2),
 (1, 3),
 (4, 3),
 (5, 3),
@@ -52,7 +51,9 @@ INSERT INTO `carts` (`cart_id`, `user_id`) VALUES
 (12, 10),
 (13, 10),
 (14, 10),
-(15, 10);
+(15, 10),
+(17, 11),
+(18, 11);
 
 -- --------------------------------------------------------
 
@@ -87,7 +88,8 @@ INSERT INTO `cart_products` (`cart_id`, `product_id`, `quantity`) VALUES
 (13, 7, 1),
 (14, 8, 1),
 (15, 7, 1),
-(16, 8, 3);
+(17, 8, 2),
+(18, 9, 1);
 
 -- --------------------------------------------------------
 
@@ -135,7 +137,8 @@ CREATE TABLE `notifications` (
 
 INSERT INTO `notifications` (`notification_id`, `user_id`, `message`, `created_at`, `is_read`) VALUES
 (1, 10, 'testing maseh', '2025-01-10 18:12:01', 1),
-(2, 10, 'hello', '2025-01-10 18:45:03', 1);
+(2, 10, 'hello', '2025-01-10 18:45:03', 1),
+(3, 11, 'judgement day', '2025-01-11 02:39:06', 1);
 
 -- --------------------------------------------------------
 
@@ -170,8 +173,8 @@ INSERT INTO `orders` (`order_id`, `cart_id`, `address`, `price`, `status`, `prom
 (11, 13, 'tst', 20.5, 'UNPAID', 'No Promo'),
 (12, 14, 'helo', 45, 'UNPAID', 'No Promo'),
 (13, 15, 'helo', 18.45, 'UNPAID', 'WELCOME_BONUS'),
-(14, 3, 'sdsd', 55.35, 'UNPAID', 'WELCOME_BONUS'),
-(15, 16, 'adsds', 101.25, 'PAID', 'NEW_YEAR_2025');
+(16, 17, 'bandung', 72, 'UNPAID', 'FLASH_DEAL'),
+(17, 18, 'bandung', 11.25, 'PAID', 'NEW_YEAR_2025');
 
 -- --------------------------------------------------------
 
@@ -198,7 +201,8 @@ CREATE TABLE `products` (
 INSERT INTO `products` (`product_id`, `name`, `description`, `price`, `stock_quantity`, `category_id`, `discount_price`, `image_url`, `warehouse_id`) VALUES
 (7, 'Chair', 'Comfortable wooden chair', 20.5, 100, 4, 0, '', 1),
 (8, 'Table', 'Wooden dining table', 45, 50, 4, 0, '', 1),
-(9, 'Lamp', 'Stylish desk lamp', 15, 200, 7, 0, '', 2);
+(9, 'Lamp', 'Stylish desk lamp', 15, 200, 7, 0, '', 2),
+(16, 'final', 'final test', 100, 1000, 1, 0, '86dc8e1a-5a15-43dc-be6f-e5584bc8d4c5.png', NULL);
 
 -- --------------------------------------------------------
 
@@ -244,7 +248,31 @@ CREATE TABLE `return_requests` (
 INSERT INTO `return_requests` (`id`, `transaction_id`, `user_id`, `request_date`) VALUES
 (1, 13, 10, '2025-01-11'),
 (2, 13, 10, '2025-01-11'),
-(3, 12, 10, '2025-01-11');
+(3, 12, 10, '2025-01-11'),
+(4, 16, 11, '2025-01-11');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `reviews`
+--
+
+CREATE TABLE `reviews` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `transaction_id` int(11) NOT NULL,
+  `rating` int(11) NOT NULL CHECK (`rating` >= 1 and `rating` <= 5),
+  `review_text` text DEFAULT NULL,
+  `review_date` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `reviews`
+--
+
+INSERT INTO `reviews` (`id`, `user_id`, `transaction_id`, `rating`, `review_text`, `review_date`) VALUES
+(1, 10, 13, 4, 'helo', '2025-01-11 01:55:51'),
+(2, 11, 17, 5, 'bagus banget', '2025-01-11 02:40:02');
 
 -- --------------------------------------------------------
 
@@ -281,8 +309,8 @@ INSERT INTO `transactions` (`transaction_id`, `cart_id`, `promo_id`, `sub_total`
 (11, 13, NULL, 20.5, 20.5, '2025-01-11', 0, 10),
 (12, 14, NULL, 45, 45, '2025-01-11', 0, 10),
 (13, 15, NULL, 20.5, 18.45, '2025-01-11', 2.0500000000000003, 10),
-(14, 3, NULL, 61.5, 55.35, '2025-01-11', 6.15, 2),
-(15, 16, NULL, 135, 101.25, '2025-01-11', 33.75, 2);
+(16, 17, NULL, 90, 72, '2025-01-11', 18, 11),
+(17, 18, NULL, 15, 11.25, '2025-01-11', 3.75, 11);
 
 -- --------------------------------------------------------
 
@@ -309,15 +337,16 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`user_id`, `username`, `password`, `email`, `user_type`, `name`, `phone`, `address`, `income`, `is_active`) VALUES
 (1, 'admin', 'admin123', 'admin@ikea.com', 'ADMIN', NULL, NULL, NULL, 50000, 0),
-(2, 'customer1', 'cust123', 'customer1@ikea.com', 'CUSTOMER', 'John Doe', '123456789', NULL, 0, 0),
+(2, 'customer1', 'cust123', 'customer1@ikea.com', 'CUSTOMER', 'John Doe', '123456789', NULL, 0, 1),
 (3, 'rudicc', 'rudicc123', 'rudicc@gmail.com', 'CUSTOMER', 'rudiccon', '08172128382', NULL, 0, 0),
 (4, 'tata', 'tata@gmail.com', '111', 'CUSTOMER', 'tatababiwoi', '1234567890', NULL, 0, 0),
 (5, 'ko dion', 'kodion123', 'kodion@gmail.com', 'CUSTOMER', 'kodionif', '123456789', NULL, 0, 0),
 (6, 'tatalagi2', 'tataa2@gmail.com', '1234', 'CUSTOMER', 'Prabs', '08776', NULL, 0, 0),
 (7, 'testing', 'testing@gmail.com', '112233', 'CUSTOMER', 'testingOnly', '085', NULL, 0, 1),
-(8, 'haiz', 'hais@gmail.com', '556', 'CUSTOMER', 'hhhh', '088', NULL, 0, 1),
-(9, 'hahaha', 'hah@gmail.com', 'heh', 'CUSTOMER', 'lmao', '09', NULL, 0, 0),
-(10, 'finn', '12332', 'fin@gmail.com', 'CUSTOMER', 'finish', '099', NULL, 0, 0);
+(8, 'haiz', 'hais@gmail.com', '556', 'CUSTOMER', 'hhhh', '088', NULL, 0, 0),
+(9, 'hahaha', 'hah@gmail.com', 'heh', 'CUSTOMER', 'lmao', '09', NULL, 0, 1),
+(10, 'finn', '12332', 'fin@gmail.com', 'CUSTOMER', 'finish', '099', NULL, 0, 0),
+(11, 'finaltest', '333', 'finaltest@gmail.com', 'CUSTOMER', 'final testing', '37', NULL, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -341,6 +370,19 @@ INSERT INTO `warehouses` (`warehouse_id`, `name`, `address`, `phone`, `operation
 (1, 'IKEA North Jakarta', 'Jl. Boulevard Kelapa Gading, North Jakarta', '021-45678901', 'ACTIVE'),
 (2, 'IKEA South Jakarta', 'Jl. TB Simatupang, South Jakarta', '021-78901234', 'ACTIVE'),
 (3, 'IKEA Tangerang', 'Jl. BSD Raya Utama, Tangerang', '021-89012345', 'ACTIVE');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `wishlists`
+--
+
+CREATE TABLE `wishlists` (
+  `wishlist_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `date_added` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Indexes for dumped tables
@@ -403,6 +445,14 @@ ALTER TABLE `return_requests`
   ADD KEY `user_id` (`user_id`);
 
 --
+-- Indexes for table `reviews`
+--
+ALTER TABLE `reviews`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `transaction_id` (`transaction_id`);
+
+--
 -- Indexes for table `transactions`
 --
 ALTER TABLE `transactions`
@@ -425,6 +475,14 @@ ALTER TABLE `warehouses`
   ADD PRIMARY KEY (`warehouse_id`);
 
 --
+-- Indexes for table `wishlists`
+--
+ALTER TABLE `wishlists`
+  ADD PRIMARY KEY (`wishlist_id`),
+  ADD UNIQUE KEY `unique_user_product` (`user_id`,`product_id`),
+  ADD KEY `product_id` (`product_id`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -432,7 +490,7 @@ ALTER TABLE `warehouses`
 -- AUTO_INCREMENT for table `carts`
 --
 ALTER TABLE `carts`
-  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -444,49 +502,61 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `product_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `product_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `promos`
 --
 ALTER TABLE `promos`
-  MODIFY `promo_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `promo_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `return_requests`
 --
 ALTER TABLE `return_requests`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `reviews`
+--
+ALTER TABLE `reviews`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `transactions`
 --
 ALTER TABLE `transactions`
-  MODIFY `transaction_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `transaction_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `warehouses`
 --
 ALTER TABLE `warehouses`
   MODIFY `warehouse_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `wishlists`
+--
+ALTER TABLE `wishlists`
+  MODIFY `wishlist_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Constraints for dumped tables
@@ -531,10 +601,24 @@ ALTER TABLE `return_requests`
   ADD CONSTRAINT `return_requests_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
 
 --
+-- Constraints for table `reviews`
+--
+ALTER TABLE `reviews`
+  ADD CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
+  ADD CONSTRAINT `reviews_ibfk_2` FOREIGN KEY (`transaction_id`) REFERENCES `transactions` (`transaction_id`);
+
+--
 -- Constraints for table `transactions`
 --
 ALTER TABLE `transactions`
   ADD CONSTRAINT `fk_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
+
+--
+-- Constraints for table `wishlists`
+--
+ALTER TABLE `wishlists`
+  ADD CONSTRAINT `wishlists_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
+  ADD CONSTRAINT `wishlists_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

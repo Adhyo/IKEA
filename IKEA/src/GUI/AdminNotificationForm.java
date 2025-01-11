@@ -62,14 +62,13 @@ public class AdminNotificationForm extends JFrame {
         JLabel userLabel = new JLabel("Select User:");
         userLabel.setForeground(Color.WHITE);
         userComboBox = new JComboBox<>();
-        loadUsers(); // Method to load users from database
+        loadUsers();
         
         gbc.gridy = 0;
         formPanel.add(userLabel, gbc);
         gbc.gridy = 1;
         formPanel.add(userComboBox, gbc);
 
-        // Message Area
         JLabel messageLabel = new JLabel("Message:");
         messageLabel.setForeground(Color.WHITE);
         messageArea = new JTextArea(5, 30);
@@ -82,7 +81,6 @@ public class AdminNotificationForm extends JFrame {
         gbc.gridy = 3;
         formPanel.add(scrollPane, gbc);
 
-        // Buttons Panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         buttonPanel.setOpaque(false);
         JButton sendButton = createStyledButton("Send Notification", true);
@@ -103,14 +101,8 @@ public class AdminNotificationForm extends JFrame {
     }
 
     private void loadUsers() {
-        // This method should be implemented to load users from the database
-        // Example implementation:
         userComboBox.removeAllItems();
-        // Add a default selection
         userComboBox.addItem("Select a user...");
-        
-        // Get users from database and add to combo box
-        // You'll need to implement this in DatabaseController
         java.util.List<String> users = dbController.getAllCustomerUsernames();
         if (users != null) {
             for (String username : users) {
@@ -152,8 +144,6 @@ public class AdminNotificationForm extends JFrame {
             return;
         }
 
-        // Send notification through DatabaseController
-        // You'll need to implement this method in DatabaseController
         boolean success = dbController.sendNotification(selectedUser, message);
 
         if (success) {

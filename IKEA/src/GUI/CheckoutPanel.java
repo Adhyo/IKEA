@@ -108,7 +108,6 @@ public class CheckoutPanel extends JPanel implements CartObserver {
         JPanel checkoutPanel = new JPanel(new BorderLayout(10, 10));
         checkoutPanel.setOpaque(false);
 
-        // Left panel for address
         JPanel leftPanel = new JPanel(new BorderLayout(5, 5));
         leftPanel.setOpaque(false);
         JLabel addressLabel = new JLabel("Delivery Address:");
@@ -120,12 +119,10 @@ public class CheckoutPanel extends JPanel implements CartObserver {
         leftPanel.add(addressLabel, BorderLayout.NORTH);
         leftPanel.add(addressScroll, BorderLayout.CENTER);
 
-        // Right panel for promo and totals
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
         rightPanel.setOpaque(false);
 
-        // Promo section
         JPanel promoPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         promoPanel.setOpaque(false);
         JLabel promoLabel = new JLabel("Select Promo:");
@@ -136,7 +133,6 @@ public class CheckoutPanel extends JPanel implements CartObserver {
         promoPanel.add(promoLabel);
         promoPanel.add(promoComboBox);
 
-        // Totals section
         JPanel totalsPanel = new JPanel();
         totalsPanel.setLayout(new BoxLayout(totalsPanel, BoxLayout.Y_AXIS));
         totalsPanel.setOpaque(false);
@@ -153,7 +149,6 @@ public class CheckoutPanel extends JPanel implements CartObserver {
             totalsPanel.add(Box.createVerticalStrut(5));
         }
 
-        // Button panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.setOpaque(false);
         JButton confirmButton = createStyledButton("Confirm Order");
@@ -279,7 +274,6 @@ public class CheckoutPanel extends JPanel implements CartObserver {
         try {
             db.connect();
     
-            // Get cart ID
             String cartQuery = "SELECT cart_id FROM carts WHERE user_id = ? AND cart_id NOT IN (SELECT cart_id FROM orders)";
             PreparedStatement cartStmt = db.con.prepareStatement(cartQuery);
             cartStmt.setInt(1, currentUser.getUserId());
@@ -287,8 +281,7 @@ public class CheckoutPanel extends JPanel implements CartObserver {
     
             if (cartRs.next()) {
                 int cartId = cartRs.getInt("cart_id");
-    
-                // Create order
+                
                 String orderQuery = "INSERT INTO orders (cart_id, address, price, status, promo_applied) VALUES (?, ?, ?, 'UNPAID', ?)";
                 PreparedStatement orderStmt = db.con.prepareStatement(orderQuery, PreparedStatement.RETURN_GENERATED_KEYS);
                 orderStmt.setInt(1, cartId);
@@ -296,13 +289,9 @@ public class CheckoutPanel extends JPanel implements CartObserver {
                 orderStmt.setDouble(3, finalAmount);
                 orderStmt.setString(4, (String) promoComboBox.getSelectedItem());
                 orderStmt.executeUpdate();
-    
-                // Get the generated order ID
                 ResultSet orderRs = orderStmt.getGeneratedKeys();
                 if (orderRs.next()) {
                     int orderId = orderRs.getInt(1);
-    
-                    // Create transaction record
                     String transQuery = "INSERT INTO transactions (cart_id, user_id, sub_total, discount_amount, final_amount, transaction_date) VALUES (?, ?, ?, ?, ?, ?)";
                     PreparedStatement transStmt = db.con.prepareStatement(transQuery);
                     transStmt.setInt(1, cartId);
@@ -312,12 +301,8 @@ public class CheckoutPanel extends JPanel implements CartObserver {
                     transStmt.setDouble(5, finalAmount);
                     transStmt.setDate(6, java.sql.Date.valueOf(LocalDate.now()));
                     transStmt.executeUpdate();
-    
-                    // Launch payment frame
                     PaymentFrame paymentFrame = new PaymentFrame(currentUser, orderId, finalAmount);
                     paymentFrame.setVisible(true);
-    
-                    // Clear the checkout display
                     clearCheckout();
                 }
             }

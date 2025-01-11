@@ -35,18 +35,16 @@ public class AdminReviewFrame extends JFrame {
         mainPanel.setLayout(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Title Label
         JLabel titleLabel = new JLabel("Customer Reviews", JLabel.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titleLabel.setForeground(Color.WHITE);
         mainPanel.add(titleLabel, BorderLayout.NORTH);
 
-        // Create table
         String[] columns = {"Review ID", "Customer Name", "Transaction ID", "Rating", "Review", "Date"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Make table read-only
+                return false;
             }
         };
         reviewTable = new JTable(tableModel);
@@ -61,7 +59,6 @@ public class AdminReviewFrame extends JFrame {
         scrollPane.setBackground(Color.WHITE);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Refresh button
         JButton refreshButton = new JButton("Refresh");
         refreshButton.setFont(new Font("Arial", Font.BOLD, 14));
         refreshButton.setBackground(new Color(0, 51, 153));
@@ -71,8 +68,6 @@ public class AdminReviewFrame extends JFrame {
 
         add(mainPanel);
         setVisible(true);
-        
-        // Load reviews when frame opens
         loadReviews();
     }
 
@@ -95,7 +90,7 @@ public class AdminReviewFrame extends JFrame {
                     rs.getInt("id"),
                     rs.getString("name"),
                     rs.getInt("transaction_id"),
-                    String.valueOf(rs.getInt("rating")), // Simply display the numerical rating
+                    String.valueOf(rs.getInt("rating")),
                     rs.getString("review_text"),
                     rs.getTimestamp("review_date")
                 };

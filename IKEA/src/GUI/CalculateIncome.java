@@ -27,9 +27,8 @@ public class CalculateIncome extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        // Initialize current month to current date
         currentMonth = Calendar.getInstance();
-        currentMonth.set(Calendar.DAY_OF_MONTH, 1); // Set to first day of month
+        currentMonth.set(Calendar.DAY_OF_MONTH, 1);
 
         // Main panel with gradient background
         JPanel mainPanel = new JPanel() {
@@ -48,7 +47,6 @@ public class CalculateIncome extends JFrame {
         mainPanel.setLayout(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Month Navigation Panel
         JPanel navigationPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         navigationPanel.setOpaque(false);
 
@@ -70,7 +68,6 @@ public class CalculateIncome extends JFrame {
         navigationPanel.add(nextButton);
         mainPanel.add(navigationPanel, BorderLayout.NORTH);
 
-        // Create table
         String[] columns = {"Date", "Transaction ID", "Sub Total", "Discount", "Final Amount"};
         DefaultTableModel model = new DefaultTableModel(columns, 0) {
             @Override
@@ -87,7 +84,6 @@ public class CalculateIncome extends JFrame {
         scrollPane.setBackground(Color.WHITE);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Summary Panel
         JPanel summaryPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         summaryPanel.setOpaque(false);
         
@@ -126,13 +122,12 @@ public class CalculateIncome extends JFrame {
 
     private void loadMonthlyIncomeData() {
         DefaultTableModel model = (DefaultTableModel) incomeTable.getModel();
-        model.setRowCount(0); // Clear existing data
+        model.setRowCount(0);
         totalIncome = 0;
 
         try {
             db.connect();
             
-            // Create calendar for end of month
             Calendar endMonth = (Calendar) currentMonth.clone();
             endMonth.add(Calendar.MONTH, 1);
             endMonth.add(Calendar.DAY_OF_MONTH, -1);
