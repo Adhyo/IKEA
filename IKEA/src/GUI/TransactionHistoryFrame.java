@@ -61,7 +61,7 @@ public class TransactionHistoryFrame extends JFrame {
         JButton refreshButton = new JButton("Refresh");
         refreshButton.setFont(new Font("Arial", Font.BOLD, 14));
         refreshButton.setBackground(new Color(0, 51, 153));
-        refreshButton.setForeground(Color.WHITE);
+        refreshButton.setForeground(Color.BLUE);
         refreshButton.addActionListener(e -> loadTransactions());
         mainPanel.add(refreshButton, BorderLayout.SOUTH);
 

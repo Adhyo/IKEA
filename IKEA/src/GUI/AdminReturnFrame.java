@@ -36,7 +36,7 @@ public class AdminReturnFrame extends JFrame {
 
         JLabel titleLabel = new JLabel("Return Requests", JLabel.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        titleLabel.setForeground(Color.WHITE);
+        titleLabel.setForeground(Color.YELLOW);
         mainPanel.add(titleLabel, BorderLayout.NORTH);
 
         String[] columns = {"Request ID", "Transaction ID", "User ID", "Request Date"};
@@ -60,7 +60,7 @@ public class AdminReturnFrame extends JFrame {
         JButton refreshButton = new JButton("Refresh");
         refreshButton.setFont(new Font("Arial", Font.BOLD, 14));
         refreshButton.setBackground(new Color(0, 51, 153));
-        refreshButton.setForeground(Color.WHITE);
+        refreshButton.setForeground(Color.BLUE);
         refreshButton.addActionListener(e -> loadReturnRequests());
         mainPanel.add(refreshButton, BorderLayout.SOUTH);
 
