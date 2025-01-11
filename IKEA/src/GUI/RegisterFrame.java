@@ -28,7 +28,6 @@ public class RegisterFrame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Main Panel with gradient background
         JPanel mainPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -45,7 +44,6 @@ public class RegisterFrame extends JFrame {
         mainPanel.setLayout(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Logo Panel
         JPanel logoPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         logoPanel.setOpaque(false);
         JLabel logoLabel = new JLabel("IKEA Marketplace");
@@ -53,7 +51,6 @@ public class RegisterFrame extends JFrame {
         logoLabel.setForeground(new Color(248, 209, 21));
         logoPanel.add(logoLabel);
 
-        // Registration Form Panel
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
@@ -61,7 +58,6 @@ public class RegisterFrame extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridwidth = 2;
 
-        // Add form fields
         addFormField(formPanel, "Username:", usernameField = new JTextField(), gbc, 0);
         addFormField(formPanel, "Password:", passwordField = new JPasswordField(), gbc, 2);
         addFormField(formPanel, "Confirm Password:", confirmPasswordField = new JPasswordField(), gbc, 4);
@@ -69,7 +65,6 @@ public class RegisterFrame extends JFrame {
         addFormField(formPanel, "Full Name:", nameField = new JTextField(), gbc, 8);
         addFormField(formPanel, "Phone:", phoneField = new JTextField(), gbc, 10);
 
-        // Buttons Panel
         JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 10, 10));
         buttonPanel.setOpaque(false);
         JButton registerButton = createStyledButton("Register", true);
@@ -132,7 +127,6 @@ public class RegisterFrame extends JFrame {
         String name = nameField.getText();
         String phone = phoneField.getText();
 
-        // Validation
         if (username.isEmpty() || password.isEmpty() || email.isEmpty() || 
             name.isEmpty() || phone.isEmpty()) {
             showMessage("Error", "Semua field harus diisi!", JOptionPane.ERROR_MESSAGE);
@@ -149,7 +143,6 @@ public class RegisterFrame extends JFrame {
             return;
         }
 
-        // Registration process
         if (dbController.registerCustomer(username, password, email, name, phone)) {
             showMessage("Success", "Registrasi berhasil! Silakan login.", 
                        JOptionPane.INFORMATION_MESSAGE);

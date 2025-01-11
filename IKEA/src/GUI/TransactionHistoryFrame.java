@@ -15,12 +15,10 @@ public class TransactionHistoryFrame extends JFrame {
     private DatabaseManager db; 
 
     public TransactionHistoryFrame() {
-        // Frame setup
         setTitle("Transaction History");
         setSize(800, 600);
         setLocationRelativeTo(null);
         
-        // Main panel with gradient background
         JPanel mainPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -37,18 +35,16 @@ public class TransactionHistoryFrame extends JFrame {
         mainPanel.setLayout(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Title Label
         JLabel titleLabel = new JLabel("Transaction History", JLabel.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titleLabel.setForeground(Color.WHITE);
         mainPanel.add(titleLabel, BorderLayout.NORTH);
 
-        // Create table
         String[] columns = {"Transaction ID", "Cart ID", "Subtotal", "Final Amount", "Date"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Make table read-only
+                return false;
             }
         };
         transactionTable = new JTable(tableModel);
@@ -58,7 +54,6 @@ public class TransactionHistoryFrame extends JFrame {
         transactionTable.setFont(new Font("Arial", Font.PLAIN, 14));
         transactionTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
         
-        // Scroll pane for table
         JScrollPane scrollPane = new JScrollPane(transactionTable);
         scrollPane.setBackground(Color.WHITE);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
@@ -73,17 +68,15 @@ public class TransactionHistoryFrame extends JFrame {
         add(mainPanel);
         setVisible(true);
         
-        // Load transactions when frame opens
         loadTransactions();
     }
 
     private void loadTransactions() {
-        // Clear existing table data
         tableModel.setRowCount(0);
         
         try {
-            db = DatabaseManager.getInstance(); // Get database instance
-            db.connect(); // Connect to database
+            db = DatabaseManager.getInstance();
+            db.connect();
             
             String query = "SELECT * FROM transactions ORDER BY transaction_date DESC";
             PreparedStatement stmt = db.con.prepareStatement(query);
@@ -104,7 +97,7 @@ public class TransactionHistoryFrame extends JFrame {
 
             rs.close();
             stmt.close();
-            db.disconnect(); // Disconnect from database
+            db.disconnect();
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this,

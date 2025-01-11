@@ -21,7 +21,6 @@ public class WishlistPanel extends JPanel {
         this.currentUser = user;
         setLayout(new BorderLayout());
 
-        // Create gradient background
         JPanel mainPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -38,7 +37,6 @@ public class WishlistPanel extends JPanel {
         mainPanel.setLayout(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Header
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         headerPanel.setOpaque(false);
         JLabel headerLabel = new JLabel("My Wishlist");
@@ -46,13 +44,11 @@ public class WishlistPanel extends JPanel {
         headerLabel.setForeground(new Color(248, 209, 21));
         headerPanel.add(headerLabel);
 
-        // Table
         createTablePanel();
         JScrollPane scrollPane = new JScrollPane(wishlistTable);
         scrollPane.setOpaque(false);
         scrollPane.getViewport().setOpaque(false);
 
-        // Buttons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
         buttonPanel.setOpaque(false);
 
@@ -227,7 +223,6 @@ public class WishlistPanel extends JPanel {
             }
         });
         
-        // Add the button to the existing button panel
         Component[] components = mainPanel.getComponents();
         for (Component comp : components) {
             if (comp instanceof JPanel && ((JPanel) comp).getLayout() instanceof FlowLayout) {

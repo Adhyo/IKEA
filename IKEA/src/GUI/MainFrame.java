@@ -90,7 +90,7 @@ public class MainFrame extends JFrame {
 
         menuBar.add(createMenuButton("Categories", KeyEvent.VK_C, e -> {
             new CategoryFrame();
-            dispose(); // Open Category Frame
+            dispose();
         }));
 
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));

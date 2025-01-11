@@ -46,7 +46,6 @@ public class ProductFrame extends JFrame {
 
         createCustomMenuBar();
 
-        // Main content panel with grid layout
         JPanel productPanel = new JPanel(new GridLayout(0, 2, 20, 20));
         productPanel.setOpaque(false);
 
@@ -63,7 +62,6 @@ public class ProductFrame extends JFrame {
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         backgroundPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Add category header
         JLabel categoryLabel = new JLabel(category.getCategoryName(), SwingConstants.CENTER);
         categoryLabel.setFont(new Font("Arial", Font.BOLD, 28));
         categoryLabel.setForeground(new Color(248, 209, 21));
@@ -83,7 +81,6 @@ public class ProductFrame extends JFrame {
             BorderFactory.createEmptyBorder(15, 15, 15, 15)
         ));
 
-        // Product details panel
         JPanel detailsPanel = new JPanel();
         detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
         detailsPanel.setOpaque(false);
@@ -91,7 +88,6 @@ public class ProductFrame extends JFrame {
         addStyledLabel(detailsPanel, "Name: " + product.getName(), Font.BOLD, 16);
         addStyledLabel(detailsPanel, "Description: " + product.getDescription(), Font.PLAIN, 14);
         
-        // Price panel with original and discount prices
         JPanel pricePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         pricePanel.setOpaque(false);
         
@@ -116,7 +112,6 @@ public class ProductFrame extends JFrame {
         detailsPanel.add(pricePanel);
         addStyledLabel(detailsPanel, "Stock: " + product.getStockQuantity(), Font.PLAIN, 14);
 
-        // Add to cart button
         JButton addToCartButton = new JButton("Add to Cart");
         styleButton(addToCartButton);
         

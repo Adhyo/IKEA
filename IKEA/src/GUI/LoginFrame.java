@@ -78,7 +78,7 @@ public class LoginFrame extends JFrame {
         passwordField.setPreferredSize(new Dimension(300, 40));
         loginPanel.add(passwordField, gbc);
 
-        JPanel buttonPanel = new JPanel(new GridLayout(1, 3, 10, 10)); // Ubah Grid menjadi 1x3
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 3, 10, 10));
         buttonPanel.setOpaque(false);
         JButton loginButton = createStyledButton("Login", true);
         JButton registerButton = createStyledButton("Register", false);

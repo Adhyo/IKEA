@@ -28,7 +28,6 @@ public class EditProfileFrame extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Main Panel with gradient background
         JPanel mainPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -45,7 +44,6 @@ public class EditProfileFrame extends JFrame {
         mainPanel.setLayout(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Logo Panel
         JPanel logoPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         logoPanel.setOpaque(false);
         JLabel logoLabel = new JLabel("Edit Profile");
@@ -53,7 +51,6 @@ public class EditProfileFrame extends JFrame {
         logoLabel.setForeground(new Color(248, 209, 21));
         logoPanel.add(logoLabel);
 
-        // Form Panel
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
@@ -61,7 +58,6 @@ public class EditProfileFrame extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridwidth = 2;
 
-        // Add form fields with current values
         usernameField = new JTextField(currentUsername);
         emailField = new JTextField(currentEmail);
         passwordField = new JPasswordField();
@@ -72,7 +68,6 @@ public class EditProfileFrame extends JFrame {
         addFormField(formPanel, "Confirm New Password:", confirmPasswordField, gbc, 4);
         addFormField(formPanel, "Email:", emailField, gbc, 6);
 
-        // Buttons Panel
         JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 10, 10));
         buttonPanel.setOpaque(false);
         JButton saveButton = createStyledButton("Save Changes", true);

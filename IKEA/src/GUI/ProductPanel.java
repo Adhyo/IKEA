@@ -234,10 +234,8 @@ public class ProductPanel extends JPanel {
     private void openWishlistPanel() {
         JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
         if (parentFrame != null) {
-            // Create a new main panel with BorderLayout
             JPanel mainContainer = new JPanel(new BorderLayout());
             
-            // Create navigation panel
             JPanel navPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
             navPanel.setBackground(new Color(0, 51, 153));
             
@@ -251,11 +249,9 @@ public class ProductPanel extends JPanel {
             
             navPanel.add(backButton);
             
-            // Add navigation and wishlist panel to main container
             mainContainer.add(navPanel, BorderLayout.NORTH);
             mainContainer.add(new WishlistPanel(currentUser), BorderLayout.CENTER);
             
-            // Replace frame content
             parentFrame.getContentPane().removeAll();
             parentFrame.add(mainContainer);
             parentFrame.revalidate();
@@ -332,7 +328,6 @@ public class ProductPanel extends JPanel {
         card.setOpaque(false);
         card.setPreferredSize(new Dimension(300, 520));
 
-        // Check if product is a best seller
         Set<Integer> bestSellers = getBestSellerProducts();
         if (bestSellers.contains(productId)) {
             JPanel badgePanel = createBestSellerBadge();
@@ -341,28 +336,23 @@ public class ProductPanel extends JPanel {
             card.add(Box.createVerticalStrut(5));
         }
 
-        // Image
         JLabel imageLabel = createImageLabel(imageUrl);
         
-        // Product info
         JLabel nameLabel = createStyledLabel(name, 16, Font.BOLD);
         JLabel priceLabel = createStyledLabel(String.format("Rp %.2f", price), 14, Font.BOLD);
         JLabel stockLabel = createStyledLabel("Stock: " + stock, 12, Font.PLAIN);
         JTextArea descArea = createDescriptionArea(description);
 
-        // Warehouse info
         JLabel warehouseLabel = null;
         if (warehouseName != null && !warehouseName.isEmpty()) {
             warehouseLabel = createStyledLabel("Available at: " + warehouseName, 12, Font.PLAIN);
         }
 
-        // Quantity spinner
         SpinnerModel spinnerModel = new SpinnerNumberModel(1, 1, stock, 1);
         JSpinner quantitySpinner = new JSpinner(spinnerModel);
         quantitySpinner.setMaximumSize(new Dimension(80, 25));
         quantitySpinner.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Buttons
         JButton addToCartBtn = createStyledButton("Add to Cart");
         JButton wishlistBtn = createStyledButton("Add to Wishlist");
         
@@ -393,7 +383,6 @@ public class ProductPanel extends JPanel {
             toggleWishlist(productId, wishlistBtn);
         });
 
-        // Add components to card
         card.add(imageLabel);
         card.add(Box.createVerticalStrut(10));
         card.add(nameLabel);

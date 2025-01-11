@@ -15,20 +15,17 @@ public class RemoveProductFrame extends JFrame {
     private DefaultTableModel tableModel;
 
     public RemoveProductFrame() {
-        // Set look and feel
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        // Frame configuration
         setTitle("IKEA Marketplace - Remove Product");
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Main panel with gradient background
         JPanel mainPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -45,17 +42,14 @@ public class RemoveProductFrame extends JFrame {
         mainPanel.setLayout(new BorderLayout(20, 20));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
 
-        // Title Label
         JLabel titleLabel = new JLabel("Remove Product", JLabel.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titleLabel.setForeground(Color.WHITE);
         mainPanel.add(titleLabel, BorderLayout.NORTH);
 
-        // Create table panel
         JPanel tablePanel = new JPanel(new BorderLayout(10, 10));
         tablePanel.setOpaque(false);
 
-        // Initialize table
         String[] columnNames = {"ID", "Name", "Description", "Price", "Stock"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
@@ -72,16 +66,13 @@ public class RemoveProductFrame extends JFrame {
         productTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
         productTable.setRowHeight(25);
 
-        // Add table to scroll pane
         JScrollPane scrollPane = new JScrollPane(productTable);
         scrollPane.setPreferredSize(new Dimension(700, 300));
         tablePanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Button panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
         buttonPanel.setOpaque(false);
 
-        // Create buttons
         JButton removeButton = createStyledButton("Remove Selected Product", true);
         JButton refreshButton = createStyledButton("Refresh List", false);
         JButton cancelButton = createStyledButton("Cancel", false);
@@ -90,19 +81,15 @@ public class RemoveProductFrame extends JFrame {
         buttonPanel.add(refreshButton);
         buttonPanel.add(cancelButton);
 
-        // Add panels to main panel
         mainPanel.add(tablePanel, BorderLayout.CENTER);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-        // Add action listeners
         removeButton.addActionListener(e -> removeSelectedProduct());
         refreshButton.addActionListener(e -> refreshProductTable());
         cancelButton.addActionListener(e -> dispose());
 
-        // Initial load of products
         refreshProductTable();
 
-        // Add main panel to frame
         add(mainPanel);
         setVisible(true);
     }
@@ -127,7 +114,7 @@ public class RemoveProductFrame extends JFrame {
     }
 
     private void refreshProductTable() {
-        tableModel.setRowCount(0); // Clear existing rows
+        tableModel.setRowCount(0);
         
         try {
             db.connect();
@@ -169,7 +156,6 @@ public class RemoveProductFrame extends JFrame {
         int productId = (int) productTable.getValueAt(selectedRow, 0);
         String productName = (String) productTable.getValueAt(selectedRow, 1);
 
-        // Confirmation dialog
         int confirm = JOptionPane.showConfirmDialog(this,
             "Are you sure you want to remove the following product?\n\n" +
             "ID: " + productId + "\n" +
@@ -185,7 +171,7 @@ public class RemoveProductFrame extends JFrame {
                         "Product removed successfully!",
                         "Success",
                         JOptionPane.INFORMATION_MESSAGE);
-                    refreshProductTable(); // Refresh the table
+                    refreshProductTable();
                 } else {
                     JOptionPane.showMessageDialog(this,
                         "Failed to remove product. It might be referenced in other tables.",
@@ -205,17 +191,15 @@ public class RemoveProductFrame extends JFrame {
     private boolean deleteProduct(int productId) throws SQLException {
         try {
             db.connect();
-            // First check if the product is in any cart
             String checkQuery = "SELECT COUNT(*) FROM cart_products WHERE product_id = ?";
             PreparedStatement checkStmt = db.con.prepareStatement(checkQuery);
             checkStmt.setInt(1, productId);
             ResultSet rs = checkStmt.executeQuery();
             rs.next();
             if (rs.getInt(1) > 0) {
-                return false; // Product is in use, cannot delete
+                return false;
             }
 
-            // If product is not in use, proceed with deletion
             String deleteQuery = "DELETE FROM products WHERE product_id = ?";
             PreparedStatement deleteStmt = db.con.prepareStatement(deleteQuery);
             deleteStmt.setInt(1, productId);

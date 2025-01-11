@@ -23,7 +23,6 @@ public class CustomerReviewFrame extends JFrame {
         setSize(500, 400);
         setLocationRelativeTo(null);
         
-        // Main panel with gradient background
         JPanel mainPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -40,20 +39,17 @@ public class CustomerReviewFrame extends JFrame {
         mainPanel.setLayout(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Title
         JLabel titleLabel = new JLabel("Write Your Review", JLabel.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
         titleLabel.setForeground(Color.WHITE);
         mainPanel.add(titleLabel, BorderLayout.NORTH);
 
-        // Center panel for review components
         JPanel centerPanel = new JPanel(new GridBagLayout());
         centerPanel.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Rating selection
         JLabel ratingLabel = new JLabel("Rating (1-5):");
         ratingLabel.setForeground(Color.WHITE);
         String[] ratings = {"5", "4", "3", "2", "1"};
@@ -67,7 +63,6 @@ public class CustomerReviewFrame extends JFrame {
         gbc.weightx = 1.0;
         centerPanel.add(ratingComboBox, gbc);
 
-        // Review text area
         JLabel reviewLabel = new JLabel("Your Review:");
         reviewLabel.setForeground(Color.WHITE);
         reviewTextArea = new JTextArea(5, 30);
@@ -89,7 +84,6 @@ public class CustomerReviewFrame extends JFrame {
 
         mainPanel.add(centerPanel, BorderLayout.CENTER);
 
-        // Button panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
         buttonPanel.setOpaque(false);
 
@@ -110,7 +104,6 @@ public class CustomerReviewFrame extends JFrame {
         add(mainPanel);
         setVisible(true);
         
-        // Check if review already exists
         checkExistingReview();
     }
 
@@ -143,7 +136,7 @@ public class CustomerReviewFrame extends JFrame {
 
     private void submitReview(ActionEvent e) {
         String reviewText = reviewTextArea.getText().trim();
-        int rating = 5 - ratingComboBox.getSelectedIndex(); // Convert from 0-based index
+        int rating = 5 - ratingComboBox.getSelectedIndex();
         
         if (reviewText.isEmpty()) {
             JOptionPane.showMessageDialog(this,

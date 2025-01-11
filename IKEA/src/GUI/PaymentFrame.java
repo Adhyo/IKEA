@@ -33,7 +33,6 @@ public class PaymentFrame extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        // Create main panel with gradient background
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10)) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -49,13 +48,11 @@ public class PaymentFrame extends JFrame {
         };
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Header
         JLabel headerLabel = new JLabel("Payment Details", JLabel.CENTER);
         headerLabel.setFont(new Font("Arial", Font.BOLD, 24));
         headerLabel.setForeground(IKEA_YELLOW);
         mainPanel.add(headerLabel, BorderLayout.NORTH);
 
-        // Payment form panel
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
@@ -63,13 +60,11 @@ public class PaymentFrame extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(5, 0, 5, 0);
 
-        // Amount display
         JLabel amountLabel = new JLabel(String.format("Amount to Pay: $%.2f", amount));
         amountLabel.setFont(new Font("Arial", Font.BOLD, 18));
         amountLabel.setForeground(Color.WHITE);
         formPanel.add(amountLabel, gbc);
 
-        // Payment method selector
         JLabel methodLabel = new JLabel("Payment Method:");
         methodLabel.setForeground(Color.WHITE);
         formPanel.add(methodLabel, gbc);
@@ -77,7 +72,6 @@ public class PaymentFrame extends JFrame {
         paymentMethodComboBox = new JComboBox<>(new String[]{"Credit Card", "Debit Card"});
         formPanel.add(paymentMethodComboBox, gbc);
 
-        // Card details
         cardNumberField = createStyledTextField("Card Number");
         expiryField = createStyledTextField("MM/YY");
         cvvField = createStyledTextField("CVV");
@@ -89,7 +83,6 @@ public class PaymentFrame extends JFrame {
         formPanel.add(new JLabel("CVV:"), gbc);
         formPanel.add(cvvField, gbc);
 
-        // Style labels
         for (Component comp : formPanel.getComponents()) {
             if (comp instanceof JLabel) {
                 comp.setForeground(Color.WHITE);
@@ -99,7 +92,6 @@ public class PaymentFrame extends JFrame {
 
         mainPanel.add(formPanel, BorderLayout.CENTER);
 
-        // Buttons panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
         buttonPanel.setOpaque(false);
 
@@ -115,7 +107,6 @@ public class PaymentFrame extends JFrame {
 
         add(mainPanel);
 
-        // Add window listener to handle closing
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -179,7 +170,6 @@ public class PaymentFrame extends JFrame {
             return;
         }
 
-        // Simulate payment processing
         JDialog processingDialog = new JDialog(this, "Processing Payment", true);
         processingDialog.setLayout(new FlowLayout());
         processingDialog.add(new JLabel("Processing payment, please wait..."));
@@ -188,7 +178,7 @@ public class PaymentFrame extends JFrame {
 
         new Thread(() -> {
             try {
-                Thread.sleep(2000); // Simulate processing delay
+                Thread.sleep(2000);
                 updateOrderStatus();
                 SwingUtilities.invokeLater(() -> {
                     processingDialog.dispose();

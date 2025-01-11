@@ -106,7 +106,6 @@ public class CustTransactionHistory extends JFrame {
                 tableModel.addRow(row);
             }
 
-            // Set up button renderers and editors for both Actions and Review columns
             transactionTable.getColumn("Actions").setCellRenderer(new ButtonRenderer());
             transactionTable.getColumn("Actions").setCellEditor(new ButtonEditor(new JCheckBox(), customerID, "return"));
             
@@ -172,7 +171,7 @@ public class CustTransactionHistory extends JFrame {
                 } else if (actionType.equals("review")) {
                     if (!label.equals("Already Reviewed")) {
                         new CustomerReviewFrame(customerID, transactionID);
-                        loadTransactions(); // Refresh the table after opening review window
+                        loadTransactions();
                     }
                 }
             }
