@@ -138,13 +138,11 @@ public class ProductPanel extends JPanel {
         Set<Integer> bestSellers = new HashSet<>();
         try {
             db.connect();
-            String query = """
-                SELECT cp.product_id, SUM(cp.quantity) as total_sold 
-                FROM cart_products cp 
-                JOIN transactions t ON cp.cart_id = t.cart_id 
-                GROUP BY cp.product_id 
-                HAVING total_sold >= ?
-            """;
+            String query = "SELECT cp.product_id, SUM(cp.quantity) as total_sold " +
+               "FROM cart_products cp " +
+               "JOIN transactions t ON cp.cart_id = t.cart_id " +
+               "GROUP BY cp.product_id " +
+               "HAVING total_sold >= ?";
             PreparedStatement pstmt = db.con.prepareStatement(query);
             pstmt.setInt(1, BEST_SELLER_THRESHOLD);
             ResultSet rs = pstmt.executeQuery();
@@ -166,12 +164,10 @@ public class ProductPanel extends JPanel {
     private void searchProducts(String searchTerm) {
         try {
             db.connect();
-            String query = """
-                SELECT p.*, w.name as warehouse_name, w.address as warehouse_address 
-                FROM products p 
-                LEFT JOIN warehouses w ON p.warehouse_id = w.warehouse_id 
-                WHERE p.name LIKE ? OR p.description LIKE ?
-            """;
+            String query = "SELECT p.*, w.name as warehouse_name, w.address as warehouse_address " +
+               "FROM products p " +
+               "LEFT JOIN warehouses w ON p.warehouse_id = w.warehouse_id " +
+               "WHERE p.name LIKE ? OR p.description LIKE ?";
             PreparedStatement pstmt = db.con.prepareStatement(query);
             String searchPattern = "%" + searchTerm + "%";
             pstmt.setString(1, searchPattern);
@@ -270,11 +266,10 @@ public class ProductPanel extends JPanel {
     private void loadProducts() {
         try {
             db.connect();
-            String query = """
-                SELECT p.*, w.name as warehouse_name, w.address as warehouse_address 
-                FROM products p 
-                LEFT JOIN warehouses w ON p.warehouse_id = w.warehouse_id
-            """;
+            String query = "SELECT p.*, w.name as warehouse_name, w.address as warehouse_address " +
+               "FROM products p " +
+               "LEFT JOIN warehouses w ON p.warehouse_id = w.warehouse_id";
+
             PreparedStatement pstmt = db.con.prepareStatement(query);
             ResultSet rs = pstmt.executeQuery();
 

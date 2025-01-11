@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 10, 2025 at 09:13 PM
+-- Generation Time: Jan 11, 2025 at 01:34 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -38,6 +38,7 @@ CREATE TABLE `carts` (
 
 INSERT INTO `carts` (`cart_id`, `user_id`) VALUES
 (3, 2),
+(16, 2),
 (1, 3),
 (4, 3),
 (5, 3),
@@ -85,7 +86,8 @@ INSERT INTO `cart_products` (`cart_id`, `product_id`, `quantity`) VALUES
 (12, 7, 4),
 (13, 7, 1),
 (14, 8, 1),
-(15, 7, 1);
+(15, 7, 1),
+(16, 8, 3);
 
 -- --------------------------------------------------------
 
@@ -146,7 +148,7 @@ CREATE TABLE `orders` (
   `cart_id` int(11) NOT NULL,
   `address` text DEFAULT NULL,
   `price` double NOT NULL,
-  `status` enum('UNPAID','DELIVER','DONE','RATED') DEFAULT NULL,
+  `status` enum('UNPAID','PAID','CANCELLED') DEFAULT NULL,
   `promo_applied` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -167,7 +169,9 @@ INSERT INTO `orders` (`order_id`, `cart_id`, `address`, `price`, `status`, `prom
 (10, 12, 'testing history', 82, 'UNPAID', 'No Promo'),
 (11, 13, 'tst', 20.5, 'UNPAID', 'No Promo'),
 (12, 14, 'helo', 45, 'UNPAID', 'No Promo'),
-(13, 15, 'helo', 18.45, 'UNPAID', 'WELCOME_BONUS');
+(13, 15, 'helo', 18.45, 'UNPAID', 'WELCOME_BONUS'),
+(14, 3, 'sdsd', 55.35, 'UNPAID', 'WELCOME_BONUS'),
+(15, 16, 'adsds', 101.25, 'PAID', 'NEW_YEAR_2025');
 
 -- --------------------------------------------------------
 
@@ -192,9 +196,9 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`product_id`, `name`, `description`, `price`, `stock_quantity`, `category_id`, `discount_price`, `image_url`, `warehouse_id`) VALUES
-(7, 'Chair', 'Comfortable wooden chair', 20.5, 100, 0, 0, '', 1),
-(8, 'Table', 'Wooden dining table', 45, 50, 0, 0, '', 1),
-(9, 'Lamp', 'Stylish desk lamp', 15, 200, 0, 0, '', 2);
+(7, 'Chair', 'Comfortable wooden chair', 20.5, 100, 4, 0, '', 1),
+(8, 'Table', 'Wooden dining table', 45, 50, 4, 0, '', 1),
+(9, 'Lamp', 'Stylish desk lamp', 15, 200, 7, 0, '', 2);
 
 -- --------------------------------------------------------
 
@@ -276,7 +280,9 @@ INSERT INTO `transactions` (`transaction_id`, `cart_id`, `promo_id`, `sub_total`
 (10, 12, NULL, 82, 82, '2025-01-11', 0, 10),
 (11, 13, NULL, 20.5, 20.5, '2025-01-11', 0, 10),
 (12, 14, NULL, 45, 45, '2025-01-11', 0, 10),
-(13, 15, NULL, 20.5, 18.45, '2025-01-11', 2.0500000000000003, 10);
+(13, 15, NULL, 20.5, 18.45, '2025-01-11', 2.0500000000000003, 10),
+(14, 3, NULL, 61.5, 55.35, '2025-01-11', 6.15, 2),
+(15, 16, NULL, 135, 101.25, '2025-01-11', 33.75, 2);
 
 -- --------------------------------------------------------
 
@@ -293,24 +299,25 @@ CREATE TABLE `users` (
   `name` varchar(100) DEFAULT NULL,
   `phone` varchar(15) DEFAULT NULL,
   `address` text DEFAULT NULL,
-  `income` double DEFAULT 0
+  `income` double DEFAULT 0,
+  `is_active` int(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`user_id`, `username`, `password`, `email`, `user_type`, `name`, `phone`, `address`, `income`) VALUES
-(1, 'admin', 'admin123', 'admin@ikea.com', 'ADMIN', NULL, NULL, NULL, 50000),
-(2, 'customer1', 'cust123', 'customer1@ikea.com', 'CUSTOMER', 'John Doe', '123456789', NULL, 0),
-(3, 'rudicc', 'rudicc123', 'rudicc@gmail.com', 'CUSTOMER', 'rudiccon', '08172128382', NULL, 0),
-(4, 'tata', 'tata@gmail.com', '111', 'CUSTOMER', 'tatababiwoi', '1234567890', NULL, 0),
-(5, 'ko dion', 'kodion123', 'kodion@gmail.com', 'CUSTOMER', 'kodionif', '123456789', NULL, 0),
-(6, 'tatalagi2', 'tataa2@gmail.com', '1234', 'CUSTOMER', 'Prabs', '08776', NULL, 0),
-(7, 'testing', 'testing@gmail.com', '112233', 'CUSTOMER', 'testingOnly', '085', NULL, 0),
-(8, 'haiz', 'hais@gmail.com', '556', 'CUSTOMER', 'hhhh', '088', NULL, 0),
-(9, 'hahaha', 'hah@gmail.com', 'heh', 'CUSTOMER', 'lmao', '09', NULL, 0),
-(10, 'finn', '12332', 'fin@gmail.com', 'CUSTOMER', 'finish', '099', NULL, 0);
+INSERT INTO `users` (`user_id`, `username`, `password`, `email`, `user_type`, `name`, `phone`, `address`, `income`, `is_active`) VALUES
+(1, 'admin', 'admin123', 'admin@ikea.com', 'ADMIN', NULL, NULL, NULL, 50000, 0),
+(2, 'customer1', 'cust123', 'customer1@ikea.com', 'CUSTOMER', 'John Doe', '123456789', NULL, 0, 0),
+(3, 'rudicc', 'rudicc123', 'rudicc@gmail.com', 'CUSTOMER', 'rudiccon', '08172128382', NULL, 0, 0),
+(4, 'tata', 'tata@gmail.com', '111', 'CUSTOMER', 'tatababiwoi', '1234567890', NULL, 0, 0),
+(5, 'ko dion', 'kodion123', 'kodion@gmail.com', 'CUSTOMER', 'kodionif', '123456789', NULL, 0, 0),
+(6, 'tatalagi2', 'tataa2@gmail.com', '1234', 'CUSTOMER', 'Prabs', '08776', NULL, 0, 0),
+(7, 'testing', 'testing@gmail.com', '112233', 'CUSTOMER', 'testingOnly', '085', NULL, 0, 1),
+(8, 'haiz', 'hais@gmail.com', '556', 'CUSTOMER', 'hhhh', '088', NULL, 0, 1),
+(9, 'hahaha', 'hah@gmail.com', 'heh', 'CUSTOMER', 'lmao', '09', NULL, 0, 0),
+(10, 'finn', '12332', 'fin@gmail.com', 'CUSTOMER', 'finish', '099', NULL, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -425,7 +432,7 @@ ALTER TABLE `warehouses`
 -- AUTO_INCREMENT for table `carts`
 --
 ALTER TABLE `carts`
-  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -443,7 +450,7 @@ ALTER TABLE `notifications`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `products`
@@ -467,7 +474,7 @@ ALTER TABLE `return_requests`
 -- AUTO_INCREMENT for table `transactions`
 --
 ALTER TABLE `transactions`
-  MODIFY `transaction_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `transaction_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `users`

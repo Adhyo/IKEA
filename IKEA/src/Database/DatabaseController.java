@@ -279,24 +279,6 @@ public class DatabaseController {
             return false;
         }
     }
-    public List<Category> getAllCategories() {
-        List<Category> categories = new ArrayList<>();
-        String query = "SELECT * FROM categories"; // Update with your actual SQL query
-        
-        try (Connection connection = DatabaseManager.getConnection();
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(query)) {
-
-            while (resultSet.next()) {
-                int id = resultSet.getInt("category_id");
-                String name = resultSet.getString("category_name");
-                categories.add(new Category(id, name));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return categories;
-    }
 
     public boolean addToWishlist(int userId, int productId) {
         try {
@@ -349,5 +331,53 @@ public class DatabaseController {
         } finally {
             db.disconnect();
         }
+
     }
+    public List<Category> getAllCategories() {
+        List<Category> categories = new ArrayList<>();
+        String query = "SELECT * FROM categories"; // Update with your actual SQL query
+        
+        try (Connection connection = DatabaseManager.getConnection();
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
+
+            while (resultSet.next()) {
+                int id = resultSet.getInt("category_id");
+                String name = resultSet.getString("category_name");
+                categories.add(new Category(id, name));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return categories;
+    }
+    public List<Product> getProductsForCategory(Category category) {
+        List<Product> products = new ArrayList<>();
+        String query = "SELECT * FROM products WHERE category_id = ?";
+        
+        try (Connection connection = DatabaseManager.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            
+            // Set the category ID parameter for the query
+            statement.setInt(1, category.getCategoryId());
+
+            // Execute the query
+            ResultSet resultSet = statement.executeQuery();
+            
+            // Loop through the results and create Product objects
+            while (resultSet.next()) {
+                int id = resultSet.getInt("product_id");
+                String name = resultSet.getString("name");
+                double price = resultSet.getDouble("price");
+
+                Product product = new Product(id, name, price, category); // Create Product with the category
+                products.add(product);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return products;  // Return the list of products for the given category
+    }
+    
 }

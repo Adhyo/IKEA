@@ -20,6 +20,13 @@ public class Product {
         this.discountPrice = discountPrice;
     }
 
+    public Product(int productId, String name, double price, Category category) {
+        this.productId = productId;
+        this.name = name;
+        this.price = price;
+        this.category = category;
+    }
+
     public int getProductId() {
         return productId;
     }

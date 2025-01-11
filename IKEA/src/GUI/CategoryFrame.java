@@ -1,27 +1,31 @@
 package GUI;
 
-import Database.DatabaseController;
 import Model.Category;
+import Model.Product;
+import Database.DatabaseController;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.util.List;
 
 public class CategoryFrame extends JFrame {
     private DatabaseController dbController;
-    private JPanel categoryPanel;
 
     public CategoryFrame() {
         dbController = new DatabaseController();
 
-        setTitle("Categories");
-        setSize(500, 600);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        setTitle("IKEA Marketplace - Categories");
+        setSize(1024, 768);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Create background panel
         JPanel backgroundPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -35,50 +39,127 @@ public class CategoryFrame extends JFrame {
                 g2d.fillRect(0, 0, getWidth(), getHeight());
             }
         };
-        backgroundPanel.setLayout(new BorderLayout());
+        backgroundPanel.setLayout(new BorderLayout(20, 20));
+        backgroundPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Create the category panel
-        categoryPanel = new JPanel();
-        categoryPanel.setLayout(new GridLayout(0, 1, 10, 10)); // Vertical list of categories
+        createCustomMenuBar();
+
+        // Main content panel with grid layout
+        JPanel categoryPanel = new JPanel(new GridLayout(0, 3, 15, 15));
         categoryPanel.setOpaque(false);
 
-        // Fetch categories from the database
         List<Category> categories = dbController.getAllCategories();
+
         for (Category category : categories) {
-            JButton categoryButton = new JButton(category.getCategoryName());
-            categoryButton.setFont(new Font("Arial", Font.BOLD, 14));
-            categoryButton.setPreferredSize(new Dimension(200, 40));
-            categoryButton.setBackground(new Color(0, 51, 153));
-            categoryButton.setForeground(new Color(248, 209, 21));
-            categoryButton.setBorder(BorderFactory.createLineBorder(Color.WHITE));
-            categoryButton.setFocusPainted(false);
-            categoryButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
-            // Add action listener to open the selected category's details
-            categoryButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    openCategoryDetails(category);
-                }
-            });
-
-            categoryPanel.add(categoryButton);
+            JPanel categoryCard = createCategoryCard(category);
+            categoryPanel.add(categoryCard);
         }
 
-        backgroundPanel.add(categoryPanel, BorderLayout.CENTER);
+        JScrollPane scrollPane = new JScrollPane(categoryPanel);
+        scrollPane.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        backgroundPanel.add(scrollPane, BorderLayout.CENTER);
+
+        // Add a welcome header
+        JLabel welcomeLabel = new JLabel("Browse Categories", SwingConstants.CENTER);
+        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 28));
+        welcomeLabel.setForeground(new Color(248, 209, 21));
+        welcomeLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+        backgroundPanel.add(welcomeLabel, BorderLayout.NORTH);
+
         add(backgroundPanel);
         setVisible(true);
     }
 
-    // Method to open the selected category's details or products
-    private void openCategoryDetails(Category category) {
-        // Assuming you have a ProductPanel or similar to show products in this category
-        JOptionPane.showMessageDialog(this, 
-            "Showing details for: " + category.getCategoryName(),
-            "Category Details",
-            JOptionPane.INFORMATION_MESSAGE);
+    private JPanel createCategoryCard(Category category) {
+        JPanel card = new JPanel();
+        card.setLayout(new BorderLayout());
+        card.setBackground(new Color(255, 255, 255, 30));
+        card.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(248, 209, 21), 1),
+            BorderFactory.createEmptyBorder(15, 15, 15, 15)
+        ));
 
-        // Optionally, you can open another frame with category-specific products or content
-        // new ProductFrame(category);
+        JLabel nameLabel = new JLabel(category.getCategoryName(), SwingConstants.CENTER);
+        nameLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        nameLabel.setForeground(Color.WHITE);
+
+        JButton viewButton = new JButton("View Products");
+        styleButton(viewButton);
+        viewButton.addActionListener(e -> {
+            new ProductFrame(category);
+            dispose();
+        });
+
+        card.add(nameLabel, BorderLayout.CENTER);
+        card.add(viewButton, BorderLayout.SOUTH);
+
+        return card;
+    }
+
+    private void styleButton(JButton button) {
+        button.setFont(new Font("Arial", Font.BOLD, 14));
+        button.setForeground(new Color(248, 209, 21));
+        button.setBackground(new Color(0, 51, 153));
+        button.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
+        button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(new Color(0, 71, 173));
+            }
+
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(new Color(0, 51, 153));
+            }
+        });
+    }
+
+    private void createCustomMenuBar() {
+        JMenuBar menuBar = new JMenuBar();
+        menuBar.setBackground(new Color(0, 51, 153));
+        menuBar.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+        JLabel titleLabel = new JLabel("IKEA Marketplace");
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        titleLabel.setForeground(new Color(248, 209, 21));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 20));
+        menuBar.add(titleLabel);
+
+        menuBar.add(createMenuButton("Home", KeyEvent.VK_H, e -> {
+            new MainFrame(null);
+            dispose();
+        }));
+
+        menuBar.add(Box.createHorizontalGlue());
+        setJMenuBar(menuBar);
+    }
+
+    private JButton createMenuButton(String text, int mnemonic, java.awt.event.ActionListener listener) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Arial", Font.BOLD, 14));
+        button.setForeground(new Color(4, 52, 140));
+        button.setBackground(new Color(0, 51, 153));
+        button.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
+        button.setFocusPainted(false);
+        button.setContentAreaFilled(false);
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        button.setMnemonic(mnemonic);
+        if (listener != null) {
+            button.addActionListener(listener);
+        }
+
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setForeground(new Color(248, 209, 21));
+            }
+
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setForeground(new Color(4, 52, 140));
+            }
+        });
+
+        return button;
     }
 }

@@ -443,7 +443,7 @@ public class AddProductFrame extends JFrame {
             pstmt.setString(2, product.getDescription());
             pstmt.setDouble(3, product.getPrice());
             pstmt.setInt(4, product.getStockQuantity());
-            pstmt.setInt(5, product.getCategory().getCategoryId()); 
+            pstmt.setInt(5, product.getCategory().getCategoryId());
             pstmt.setDouble(6, product.getDiscountPrice());
             pstmt.setString(7, imageFileName);
 
